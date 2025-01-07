@@ -1,17 +1,21 @@
 from pydantic_settings import BaseSettings
+from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    """Configuration settings for the application."""
+    """Application settings."""
 
-    PROJECT_NAME: str = "Your Project Name"
-    API_V1_STR: str = "/api/v1"
-    SUPABASE_KEY: str = ""
+    SUPABASE_URL: str
+    SUPABASE_KEY: str
+    DATABASE_URL: str
+    API_VERSION: str = "v1"
+    DEBUG: bool = False
 
     class Config:
-        """Pydantic configuration class."""
-
         env_file = ".env"
 
 
-settings = Settings()
+@lru_cache
+def get_settings() -> Settings:
+    """Get cached settings."""
+    return Settings()
