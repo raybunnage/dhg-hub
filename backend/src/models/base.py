@@ -1,5 +1,5 @@
+from typing import Self
 from datetime import datetime
-from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -12,3 +12,8 @@ class BaseDBModel(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @classmethod
+    def create(cls, **data) -> Self:
+        """Create new instance with validation."""
+        return cls(**data)
