@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
 export function TestConnection() {
+  console.log('TestConnection component rendering');
   const [status, setStatus] = useState<string>('Loading...');
   const [error, setError] = useState<string>('');
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { api } from '../services/api';
 
 export function TestButton() {
+  console.log('TestButton component rendering');
   const [result, setResult] = useState<string>('');
 
   const testBackend = async () => {

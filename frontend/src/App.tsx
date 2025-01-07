@@ -1,24 +1,31 @@
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from './utils/queryClient'
-import './styles/index.css'
+import { useState } from 'react'
 
 function App() {
+  const [count, setCount] = useState(0)
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gray-100">
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto py-6 px-4">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Your Project Name
-            </h1>
-          </div>
-        </header>
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {/* Your content will go here */}
-        </main>
-      </div>
-    </QueryClientProvider>
-  )
+    <div style={{ 
+      padding: '50px', 
+      backgroundColor: 'red', 
+      color: 'white',
+      fontSize: '24px',
+      textAlign: 'center'
+    }}>
+      <h1>!!!VERY OBVIOUS TEST i am testing 123 !!!</h1>
+      <div>Count: {count}</div>
+      <button 
+        onClick={() => setCount(c => c + 1)}
+        style={{ 
+          padding: '20px', 
+          fontSize: '20px', 
+          margin: '20px',
+          cursor: 'pointer'
+        }}
+      >
+        Click to Count Up
+      </button>
+    </div>
+  );
 }
 
-export default App
+export default App;
