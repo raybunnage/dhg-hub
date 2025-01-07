@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     supabase_domain_id: str
     vite_supabase_url: str
     vite_supabase_anon_key: str
+    database_url: str
+    supabase_service_key: str
 
     # API Keys
     anthropic_api_key: str
