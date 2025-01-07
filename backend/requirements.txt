@@ -1,0 +1,9 @@
+fastapi>=0.104.0
+uvicorn[standard]
+pydantic[email]>=2.0.0
+pydantic-settings
+python-dotenv
+anthropic
+supabase
+pytest
+httpx 
