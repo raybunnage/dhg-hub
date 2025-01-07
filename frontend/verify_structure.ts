@@ -87,6 +87,10 @@ function verifyFrontendStructure() {
   return true
 }
 
+function handleError(_path: string, _error: Error) {
+  // ... code ...
+}
+
 // Run verification
 const success = verifyFrontendStructure()
 process.exit(success ? 0 : 1) 
