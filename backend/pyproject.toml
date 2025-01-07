@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "your-project-name"
+version = "0.1.0"
+dependencies = [
+    "fastapi",
+    "anthropic",
+    "supabase",
+    # other dependencies
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src"
+] 
