@@ -1,11 +1,12 @@
 from typing import Any, Dict, List, Optional, TypeVar, Generic
 from ..core.supabase_client import SupabaseClient
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class BaseService(Generic[T]):
     """Base service with common CRUD operations."""
-    
+
     def __init__(self, table_name: str):
         self.client = SupabaseClient.get_client()
         self.table = table_name
@@ -33,4 +34,4 @@ class BaseService(Generic[T]):
     async def delete(self, id: str) -> bool:
         """Delete a record."""
         response = self.client.table(self.table).delete().eq("id", id).execute()
-        return bool(response.data) 
+        return bool(response.data)
