@@ -1,8 +1,16 @@
+import logging
 from pathlib import Path
 import sys
 
+logger = logging.getLogger(__name__)
 
-def verify_directory_structure():
+
+def verify_directory_structure() -> bool:
+    """Verify that all required directories and files exist.
+
+    Returns:
+        bool: True if all required paths exist, False otherwise
+    """
     base_dir = Path(__file__).parent
     required_paths = [
         "src/your_project_name/__init__.py",
@@ -15,18 +23,15 @@ def verify_directory_structure():
         "tests/integration/__init__.py",
     ]
 
-    missing_paths = []
-    for path in required_paths:
-        if not (base_dir / path).exists():
-            missing_paths.append(path)
+    missing_paths = [path for path in required_paths if not (base_dir / path).exists()]
 
     if missing_paths:
-        print("❌ Missing required files/directories:")
+        logger.error("Missing required files/directories:")
         for path in missing_paths:
-            print(f"  - {path}")
+            logger.error("  - %s", path)
         return False
 
-    print("✅ All required directories and files are present!")
+    logger.info("✅ All required directories and files are present!")
     return True
 
 

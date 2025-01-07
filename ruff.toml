@@ -1,1 +1,46 @@
- 
+# Line length to match black's default
+line-length = 88
+
+# Assume Python 3.10
+target-version = "py310"
+
+[lint]
+# Enable all rules by default
+select = ["ALL"]
+
+# Exclude specific rules
+ignore = [
+    "D203",  # 1 blank line required before class docstring
+    "D212",  # Multi-line docstring summary should start at the first line
+    "D100",  # Missing docstring in public module
+    "D104",  # Missing docstring in public package
+    "PLR0913",  # Too many arguments to function call
+]
+
+# Per-file rule exclusions
+[lint.per-file-ignores]
+"tests/*" = [
+    "S101",  # Use of assert detected
+    "D103",  # Missing docstring in public function
+]
+"__init__.py" = [
+    "F401",  # Unused imports
+]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "single"
+
+[lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+known-first-party = ["dhg_hub"]  # Adjust this to your project name
+
+[lint.pycodestyle]
+max-doc-length = 88 
