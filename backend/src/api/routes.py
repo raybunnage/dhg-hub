@@ -29,3 +29,9 @@ async def create_user(
 ):
     """Create a new user."""
     return await service.create(user.model_dump())
+
+
+@router.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy"}

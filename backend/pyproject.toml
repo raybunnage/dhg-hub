@@ -15,4 +15,21 @@ dependencies = [
 [tool.pytest.ini_options]
 pythonpath = [
     "src"
-] 
+]
+
+[tool.pytest]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"] 
