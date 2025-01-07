@@ -1,9 +1,8 @@
-fastapi>=0.104.0
-uvicorn[standard]
-pydantic[email]>=2.0.0
-pydantic-settings
-python-dotenv
-anthropic
-supabase
-pytest
-httpx 
+fastapi==0.110.0
+uvicorn==0.27.1
+pydantic[email]==2.10.4
+pydantic-settings==2.7.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+supabase==2.3.4 
