@@ -1,0 +1,15 @@
+-r requirements.txt
+
+# Testing
+pytest==8.0.2
+pytest-cov==4.1.0
+pytest-asyncio==0.23.5
+
+# Linting and Type Checking
+ruff==0.3.0
+black==24.2.0
+mypy==1.8.0
+
+# Development Tools
+ipython==8.21.0
+ipdb==0.13.13 
