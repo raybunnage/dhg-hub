@@ -1,19 +1,19 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from ..services.user import UserService
-from ..models.user import User
+from ..schemas.user import UserCreate, UserResponse
+from .dependencies import get_user_service
 
 router = APIRouter()
 
 
-@router.get("/users", response_model=List[User])
-async def get_users():
+@router.get("/users", response_model=List[UserResponse])
+async def get_users(service: UserService = Depends(get_user_service)):
     """Get all users."""
-    service = UserService()
     return await service.get_all()
 
 
-@router.get("/users/{user_id}", response_model=User)
+@router.get("/users/{user_id}", response_model=UserResponse)
 async def get_user(user_id: str):
     """Get user by ID."""
     service = UserService()
@@ -23,8 +23,9 @@ async def get_user(user_id: str):
     return user
 
 
-@router.post("/users", response_model=User)
-async def create_user(user: User):
+@router.post("/users", response_model=UserResponse)
+async def create_user(
+    user: UserCreate, service: UserService = Depends(get_user_service)
+):
     """Create a new user."""
-    service = UserService()
     return await service.create(user.model_dump())
