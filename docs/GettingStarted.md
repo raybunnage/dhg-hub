@@ -301,4 +301,41 @@ async def create_user(user: User):
     """
     return user
 ```
+// ... existing documentation ...
 
+## Authentication with Supabase
+
+This project uses Supabase for authentication. The FastAPI backend validates Supabase JWT tokens using a custom dependency.
+
+### Key Implementation Details
+
+1. Removed FastAPI's built-in OAuth2PasswordBearer in favor of Supabase authentication
+2. Added `verify_supabase_token` dependency to validate Supabase JWT tokens
+3. Updated Settings to include Supabase JWT public key
+
+### Setup Instructions
+
+1. Add your Supabase JWT public key to your `.env` file:
+```env
+SUPABASE_JWT_PUBLIC_KEY=your_public_key_here
+```
+
+2. Use the authentication dependency on protected routes:
+```python
+@app.get("/protected")
+async def protected_route(user_data: dict = Depends(verify_supabase_token)):
+    return {"message": "This is protected", "user": user_data}
+```
+
+3. Include the Supabase token in client requests:
+```typescript
+const response = await fetch('your-api-endpoint', {
+  headers: {
+    Authorization: `Bearer ${supabase.auth.session()?.access_token}`
+  }
+});
+```
+
+> **Note**: When using the Supabase client library, token management is handled automatically. You just need to forward the token in your API requests.
+
+// ... rest of documentation ...

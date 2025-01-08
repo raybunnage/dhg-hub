@@ -1,8 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
 from pydantic_settings import BaseSettings
 from fastapi.testclient import TestClient
+import jwt
 
 app = FastAPI()
 
@@ -15,12 +15,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# Replace the get_current_user dependency with Supabase token validation
+async def verify_supabase_token(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+
+    token = auth_header.split(" ")[1]
+    try:
+        # Verify the JWT token using your Supabase public key
+        # You can get this from your Supabase dashboard
+        decoded = jwt.decode(
+            token,
+            settings.SUPABASE_JWT_PUBLIC_KEY,
+            algorithms=["HS256"],
+            audience="authenticated",
+        )
+        return decoded
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    # Implement JWT validation
-    pass
+# Example protected route using Supabase auth
+@app.get("/protected")
+async def protected_route(user_data: dict = Depends(verify_supabase_token)):
+    return {"message": "This is protected", "user": user_data}
 
 
 @app.get("/health")
@@ -41,8 +66,7 @@ async def http_exception_handler(request, exc):
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    SECRET_KEY: str
-    ALGORITHM: str = "HS256"
+    SUPABASE_JWT_PUBLIC_KEY: str  # Add this for token verification
 
     class Config:
         env_file = ".env"
