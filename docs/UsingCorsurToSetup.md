@@ -102,86 +102,77 @@ Similarly for the frontend, ask:
 
 Start by sharing your database schema with Cursor. For example:
 
-sql
+```sql
 create table public.products (
-id uuid default uuid_generate_v4() primary key,
-name varchar(255) not null,
-description text,
-price decimal(10,2) not null check (price >= 0),
-stock integer not null check (stock >= 0),
-created_at timestamp with time zone default now(),
-updated_at timestamp with time zone default now()
+    id uuid default uuid_generate_v4() primary key,
+    name varchar(255) not null,
+    description text,
+    price decimal(10,2) not null check (price >= 0),
+    stock integer not null check (stock >= 0),
+    created_at timestamp with time zone default now(),
+    updated_at timestamp with time zone default now()
 );
-
+```
 
 Ask Cursor to generate corresponding models and validation:
 
+```python
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, Field, validator
+from uuid import UUID
+
+class TimestampedModel(BaseModel):
+    """Base model for all database entities with timestamps"""
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+    class Config:
+        orm_mode = True
+```
+
+### 2. Example Prompts
+
+When working with Cursor, use specific prompts like:
+
+```plaintext
 "Please create Pydantic models with proper validation based on these database constraints. Include:
 - Type validation
 - Range checks
 - Required fields
 - Default values"
+```
 
 ### 2. Base Class Generation
 
-Use Cursor to create abstract base classes that enforce your patterns:
+Use Cursor to help create validation generators:
 
-python
-from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, Field, validator
-from uuid import UUID
-class TimestampedModel(BaseModel):
-"""Base model for all database entities with timestamps"""
-created_at: datetime = Field(default_factory=datetime.now)
-updated_at: datetime = Field(default_factory=datetime.now)
-class Config:
-orm_mode = True
-class CRUDBase:
-"""Abstract base class for CRUD operations"""
-def init(self, model: BaseModel):
-self.model = model
-async def create(self, db, kwargs):
-raise NotImplementedError()
-async def read(self, db, id: UUID):
-raise NotImplementedError()
-async def update(self, db, id: UUID, kwargs):
-raise NotImplementedError()
-async def delete(self, db, id: UUID):
-raise NotImplementedError()
-
-
-### 3. Automated Validation Generation
-
-Ask Cursor to help create validation generators:
-
-python
+```python
 def generate_field_validators(table_schema: dict):
-"""
-Generates validation rules based on database constraints
-Example usage:
-schema = {
-'price': {'type': 'decimal', 'min': 0, 'required': True},
-'stock': {'type': 'integer', 'min': 0, 'required': True}
-}
-"""
-validators = {}
-for field, constraints in table_schema.items():
-if constraints.get('required'):
-validators[f'validate_{field}'] = {
-'pre': True,
-'validator': f'lambda v: v is not None'
-}
-if 'min' in constraints:
-validators[f'validate_{field}range'] = {
-'validator': f'lambda v: v >= {constraints["min"]}'
-}
-return validators
-
-
-Ask Cursor to help implement specific validators for your needs
-
-# Ask Cursor to help implement specific validators for your needs
+    """
+    Generates validation rules based on database constraints
+    
+    Example usage:
+    schema = {
+        'price': {'type': 'decimal', 'min': 0, 'required': True},
+        'stock': {'type': 'integer', 'min': 0, 'required': True}
+    }
+    """
+    validators = {}
+    
+    for field, constraints in table_schema.items():
+        if constraints.get('required'):
+            validators[f'validate_{field}'] = {
+                'pre': True,
+                'validator': f'lambda v: v is not None'
+            }
+        
+        if 'min' in constraints:
+            validators[f'validate_{field}_range'] = {
+                'validator': f'lambda v: v >= {constraints["min"]}'
+            }
+            
+    return validators
 ```
 
 ## Leveraging Cursor for Code Generation
@@ -191,77 +182,75 @@ Ask Cursor to help implement specific validators for your needs
 Create templates and ask Cursor to help implement them:
 
 ```python
-
-python
 def generate_crud_endpoints(model_name: str, model_fields: list):
-"""
-Template for generating CRUD endpoints
-"""
-return f"""
+    """
+    Template for generating CRUD endpoints
+    """
+    return f"""
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from uuid import UUID
 from app.models.{model_name.lower()} import {model_name}Model
 from app.services.database import get_db
+
 router = APIRouter()
+
 @router.post("/{model_name.lower()}s/", response_model={model_name}Model)
 async def create_{model_name.lower()}(item: {model_name}Model, db = Depends(get_db)):
-# Implementation here
-pass
+    # Implementation here
+    pass
+
 @router.get("/{model_name.lower()}s/", response_model=List[{model_name}Model])
 async def list_{model_name.lower()}s(skip: int = 0, limit: int = 100, db = Depends(get_db)):
-# Implementation here
-pass
-Additional endpoints...
+    # Implementation here
+    pass
+
+# Additional endpoints...
 """
-
-Additional endpoints...
-
+```
 
 ### 2. React Component Generation
 
 Use Cursor to generate standardized React components:
 
-typescript
+```typescript
 interface CRUDComponentProps<T> {
-data: T[];
-onCreate: (item: Omit<T, 'id'>) => Promise<void>;
-onUpdate: (id: string, item: Partial<T>) => Promise<void>;
-onDelete: (id: string) => Promise<void>;
-columns: {
-field: keyof T;
-header: string;
-type: 'text' | 'number' | 'date' | 'boolean';
-editable?: boolean;
-}[];
+    data: T[];
+    onCreate: (item: Omit<T, 'id'>) => Promise<void>;
+    onUpdate: (id: string, item: Partial<T>) => Promise<void>;
+    onDelete: (id: string) => Promise<void>;
+    columns: {
+        field: keyof T;
+        header: string;
+        type: 'text' | 'number' | 'date' | 'boolean';
+        editable?: boolean;
+    }[];
 }
-// Ask Cursor to implement the component based on your needs
-
+```
 
 ### 3. Type Generation
 
 Generate TypeScript types from your database schema:
 
-typescript
-// Example type generation template
+```typescript
 interface TypeGeneratorConfig {
-sqlToTsTypes: Record<string, string>;
-generateNullable: boolean;
+    sqlToTsTypes: Record<string, string>;
+    generateNullable: boolean;
 }
-const defaultConfig: TypeGeneratorConfig = {
-sqlToTsTypes: {
-'uuid': 'string',
-'varchar': 'string',
-'text': 'string',
-'integer': 'number',
-'decimal': 'number',
-'boolean': 'boolean',
-'timestamp': 'Date'
-},
-generateNullable: true
-};
-// Ask Cursor to help implement the type generator
 
+const defaultConfig: TypeGeneratorConfig = {
+    sqlToTsTypes: {
+        'uuid': 'string',
+        'varchar': 'string',
+        'text': 'string',
+        'integer': 'number',
+        'decimal': 'number',
+        'boolean': 'boolean',
+        'timestamp': 'Date'
+    },
+    generateNullable: true
+};
+```
 
 ## Testing and Validation
 
@@ -269,78 +258,89 @@ generateNullable: true
 
 Use Cursor to generate comprehensive test suites:
 
-python
+```python
 def generate_endpoint_tests(endpoint_info: dict):
-"""
-Generates test cases for API endpoints
-Example:
-endpoint_info = {
-'path': '/api/v1/products',
-'method': 'POST',
-'body_model': ProductCreate,
-'response_model': Product
-}
-"""
-return f"""
+    """
+    Generates test cases for API endpoints
+    
+    Example:
+    endpoint_info = {
+        'path': '/api/v1/products',
+        'method': 'POST',
+        'body_model': ProductCreate,
+        'response_model': Product
+    }
+    """
+    return f"""
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
-client = TestClient(app)
-def test_{endpoint_info['method'].lower()}{endpoint_info['path'].replace('/', '')}():
-test_data = {{
-# Ask Cursor to generate test data based on the model
-}}
-response = client.{endpoint_info['method'].lower()}(
-"{endpoint_info['path']}",
-json=test_data
-)
-assert response.status_code == 200
-data = response.json()
-# Validate response structure
-for field in test_data:
-assert field in data
-"""
 
+client = TestClient(app)
+
+def test_{endpoint_info['method'].lower()}_{endpoint_info['path'].replace('/', '_')}():
+    test_data = {{
+        # Ask Cursor to generate test data based on the model
+    }}
+    
+    response = client.{endpoint_info['method'].lower()}(
+        "{endpoint_info['path']}",
+        json=test_data
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    
+    # Validate response structure
+    for field in test_data:
+        assert field in data
+"""
+```
 
 ### 2. Integration Testing
 
 Create templates for testing database operations:
 
-python
+```python
 def generate_integration_tests(model_name: str):
-return f"""
+    return f"""
 import pytest
 from sqlalchemy.orm import Session
 from app.models.{model_name.lower()} import {model_name}
 from app.crud.{model_name.lower()} import {model_name}CRUD
-@pytest.fixture
-def {model_name.lower()}crud():
-return {model_name}CRUD()
-async def test_{model_name.lower()}crud_operations(
-db: Session,
-{model_name.lower()}crud: {model_name}CRUD
-):
-# Create
-new_{model_name.lower()} = await {model_name.lower()}crud.create(
-db,
-# Ask Cursor to generate test data
-)
-assert new_{model_name.lower()}.id is not None
-# Read
-retrieved = await {model_name.lower()}crud.read(db, new{model_name.lower()}.id)
-assert retrieved is not None
-# Update
-updated = await {model_name.lower()}crud.update(
-db,
-new_{model_name.lower()}.id,
-# Ask Cursor to generate update data
-)
-assert updated is not None
-# Delete
-deleted = await {model_name.lower()}crud.delete(db, new{model_name.lower()}.id)
-assert deleted is True
-"""
 
+@pytest.fixture
+def {model_name.lower()}_crud():
+    return {model_name}CRUD()
+
+async def test_{model_name.lower()}_crud_operations(
+    db: Session,
+    {model_name.lower()}_crud: {model_name}CRUD
+):
+    # Create
+    new_{model_name.lower()} = await {model_name.lower()}_crud.create(
+        db,
+        # Ask Cursor to generate test data
+    )
+    assert new_{model_name.lower()}.id is not None
+    
+    # Read
+    retrieved = await {model_name.lower()}_crud.read(db, new_{model_name.lower()}.id)
+    assert retrieved is not None
+    
+    # Update
+    updated = await {model_name.lower()}_crud.update(
+        db,
+        new_{model_name.lower()}.id,
+        # Ask Cursor to generate update data
+    )
+    assert updated is not None
+    
+    # Delete
+    deleted = await {model_name.lower()}_crud.delete(db, new_{model_name.lower()}.id)
+    assert deleted is True
+"""
+```
 
 ## Documentation Generation
 
@@ -348,27 +348,27 @@ assert deleted is True
 
 Use Cursor to generate comprehensive API documentation:
 
-python
+```python
 def generate_api_docs(endpoints: list):
-"""
-Generate markdown documentation for API endpoints
-"""
-docs = """
-API Documentation
-Endpoints
-"""
-for endpoint in endpoints:
-docs += f"""
-{endpoint['name']}
-URL: {endpoint['path']}
-Method: {endpoint['method']}
+    """
+    Generate markdown documentation for API endpoints
+    """
+    docs = """
+# API Documentation
 
+## Endpoints
+"""
+    for endpoint in endpoints:
+        docs += f"""
+### {endpoint['name']}
+
+**URL:** `{endpoint['path']}`
+**Method:** `{endpoint['method']}`
 
 #### Request Body
 ```json
 {endpoint['request_example']}
 ```
-
 
 #### Response
 ```json
@@ -376,54 +376,72 @@ Method: {endpoint['method']}
 ```
 
 #### Error Responses
-
-Error Responses
 | Status Code | Description |
 |------------|-------------|
 {endpoint['errors']}
+
 ---
 """
-return docs
-
+    return docs
+```
 
 ### 2. Component Documentation
 
 Generate React component documentation:
 
-typescript
+```typescript
 interface ComponentDoc {
-name: string;
-description: string;
-props: {
-name: string;
-type: string;
-required: boolean;
-description: string;
-}[];
-examples: string[];
-}
-function generateComponentDocs(component: ComponentDoc): string {
-return # ${component.name}${component.description}## Props| Name | Type | Required | Description ||------|------|----------|-------------|${component.props.map(prop => | ${prop.name} | ${prop.type} | ${prop.required} | ${prop.description} |).join('\n')}## Examples${component.examples.map(example => \\\tsx\n${example}\n\\\).join('\n\n')};
+    name: string;
+    description: string;
+    props: {
+        name: string;
+        type: string;
+        required: boolean;
+        description: string;
+    }[];
+    examples: string[];
 }
 
+function generateComponentDocs(component: ComponentDoc): string {
+    return `
+# ${component.name}
+
+${component.description}
+
+## Props
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+${component.props.map(prop => 
+    `| ${prop.name} | ${prop.type} | ${prop.required} | ${prop.description} |`
+).join('\n')}
+
+## Examples
+
+${component.examples.map(example => 
+    `\`\`\`tsx\n${example}\n\`\`\``
+).join('\n\n')}
+`;
+}
+```
 
 ## Best Practices
 
 ### 1. Working with Cursor
 
 1. **Be Specific in Requests**
-   ```
+   ```plaintext
    Instead of: "Help me with this code"
    Use: "Please review this React component for type safety, performance optimizations, and potential memory leaks"
    ```
 
 2. **Provide Context**
-   ```
+   ```plaintext
    "Given this database schema and these business requirements, help me generate a service layer that includes proper error handling and validation"
    ```
 
 3. **Iterative Refinement**
-   ```
+   ```plaintext
    Step 1: "Generate basic CRUD operations"
    Step 2: "Add input validation"
    Step 3: "Implement error handling"
@@ -438,29 +456,109 @@ return # ${component.name}${component.description}## Props| Name | Type | Requir
    - Group related functionality
 
 2. **Use Type Safety**
-   - Generate types from database schema
-   - Implement proper validation
-   - Use strict TypeScript configurations
+   ```typescript
+   // Example of strict TypeScript configuration
+   {
+     "compilerOptions": {
+       "strict": true,
+       "noImplicitAny": true,
+       "strictNullChecks": true,
+       "strictFunctionTypes": true,
+       "strictBindCallApply": true,
+       "strictPropertyInitialization": true,
+       "noImplicitThis": true,
+       "useUnknownInCatchVariables": true,
+       "alwaysStrict": true
+     }
+   }
+   ```
 
 3. **Error Handling**
-   - Create standardized error responses
-   - Implement proper logging
-   - Use custom error classes
+   ```typescript
+   // Example of custom error classes
+   class APIError extends Error {
+     constructor(
+       public statusCode: number,
+       public message: string,
+       public details?: unknown
+     ) {
+       super(message);
+       this.name = 'APIError';
+     }
+   }
+   ```
 
 ## Conclusion
 
-Using Cursor AI effectively requires:
-1. Clear communication of requirements
-2. Systematic approach to development
-3. Consistent use of patterns and standards
-4. Comprehensive testing
-5. Thorough documentation
+### Key Takeaways
 
-Remember to:
-- Start with proper setup
-- Use generated code as a foundation
-- Review and refine AI suggestions
-- Maintain consistent patterns
-- Document as you go
+1. **Systematic Development**
+   ```plaintext
+   - Start with clear project structure
+   - Use database schema as source of truth
+   - Generate code from templates
+   - Validate against defined constraints
+   ```
 
-By following these practices, you can leverage Cursor AI to create robust, maintainable applications while significantly reducing development time.
+2. **Effective Cursor Usage**
+   ```plaintext
+   - Provide detailed context in prompts
+   - Use iterative development approach
+   - Request specific improvements
+   - Verify generated code
+   ```
+
+3. **Quality Assurance**
+   ```plaintext
+   - Generate comprehensive tests
+   - Implement validation at all levels
+   - Maintain type safety
+   - Document thoroughly
+   ```
+
+### Best Practices Checklist
+
+1. **Project Setup**
+   - [ ] Define clear project structure
+   - [ ] Set up development environment
+   - [ ] Configure linting and formatting
+   - [ ] Establish coding standards
+
+2. **Development Flow**
+   - [ ] Create base classes and interfaces
+   - [ ] Implement validation generators
+   - [ ] Set up automated testing
+   - [ ] Generate documentation
+
+3. **Code Quality**
+   - [ ] Maintain consistent patterns
+   - [ ] Implement proper error handling
+   - [ ] Ensure type safety
+   - [ ] Write comprehensive tests
+
+### Final Tips
+
+1. **Communication with Cursor**
+   ```plaintext
+   - Be specific in requests
+   - Provide necessary context
+   - Ask for explanations when needed
+   - Review and refine suggestions
+   ```
+
+2. **Continuous Improvement**
+   ```plaintext
+   - Regularly update templates
+   - Refine generation scripts
+   - Expand test coverage
+   - Enhance documentation
+   ```
+
+By following these practices and leveraging Cursor AI effectively, you can:
+- Reduce development time
+- Maintain consistent code quality
+- Ensure proper validation and type safety
+- Create maintainable and scalable applications
+- Generate comprehensive documentation
+
+Remember that Cursor AI is a tool to augment your development process, not replace critical thinking and architectural decisions. Use it to streamline repetitive tasks and maintain consistency while focusing on the unique aspects of your application.
