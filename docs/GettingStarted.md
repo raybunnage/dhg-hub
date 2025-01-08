@@ -217,3 +217,88 @@ const Card: React.FC<CardProps> = ({ title, description, imageUrl }) => {
 ```
 
 
+## Documentation
+Access auto-generated docs at:
+- `/docs` (Swagger UI)
+- `/redoc` (ReDoc)
+
+## Best Practices
+- Use Pydantic models for request/response validation
+- Implement proper error handling
+- Use dependency injection
+- Write tests for all endpoints
+- Use async where appropriate
+- Implement proper logging
+- Use environment variables for configuration
+
+## Security Checklist
+- Implement proper authentication
+- Use HTTPS in production
+- Validate all inputs
+- Rate limiting
+- Proper CORS configuration
+- Secure password handling
+
+## Remember to:
+- Keep routes organized in separate files
+- Document your API endpoints
+- Handle errors gracefully
+- Write tests as you develop
+- Use async functions for I/O operations 
+
+
+## API Documentation Tools
+
+### Swagger UI (`/docs`)
+- Interactive API documentation
+- Lets you test API endpoints directly in the browser
+- Shows request/response schemas
+- Allows you to input parameters and try requests
+- Available at `http://localhost:8000/docs`
+
+### ReDoc (`/redoc`)
+- Clean, easy-to-read API documentation
+- More user-friendly for non-developers
+- Better for sharing with stakeholders
+- Available at `http://localhost:8000/redoc`
+
+### How to Access Documentation
+
+1. Start your FastAPI server:
+```bash
+uvicorn app.main:app --reload
+```
+
+2. Visit the URLs:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+### Auto-Generation Features
+Documentation is automatically generated from:
+- Your route definitions
+- Pydantic models
+- Function docstrings
+- Parameter types
+
+### Example Code
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class User(BaseModel):
+    name: str
+    email: str
+
+@app.post("/users/")
+async def create_user(user: User):
+    """
+    Create a new user with the following information:
+    
+    - **name**: user's full name
+    - **email**: user's email address
+    """
+    return user
+```
+
