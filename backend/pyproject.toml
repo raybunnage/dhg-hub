@@ -12,15 +12,17 @@ dependencies = [
     # other dependencies
 ]
 
-[tool.pytest.ini_options]
-pythonpath = [
-    "src"
-]
+# Package definition for proper import resolution
+[tool.hatch.build.targets.wheel]
+packages = ["src/dhg"]
 
-[tool.pytest]
-testpaths = ["tests"]
+# Single consolidated pytest configuration
+[tool.pytest.ini_options]
+pythonpath = ["backend/src"]
+testpaths = ["backend/tests"]
 python_files = ["test_*.py"]
 
+# Your code quality tools remain the same
 [tool.mypy]
 python_version = "3.12"
 strict = true
@@ -32,4 +34,4 @@ target-version = "py312"
 
 [tool.black]
 line-length = 88
-target-version = ["py312"] 
+target-version = ["py312"]
