@@ -119,10 +119,10 @@ class Logger(LoggerInterface):
         self._logger.warning(message)
 
     def error(self, message: str, error: Exception = None) -> None:
-        self._logger.error(message, exc_info=error)
+        self._logger.error(message, exc_info=error if error else True)
 
     def critical(self, message: str, error: Exception = None) -> None:
-        self._logger.critical(message, exc_info=error)
+        self._logger.critical(message, exc_info=error if error else True)
 
     def exception(self, message: str) -> None:
         self._logger.exception(message)
