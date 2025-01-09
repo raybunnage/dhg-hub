@@ -230,6 +230,23 @@ def log_method(logger: Optional[LoggerInterface] = None):
 
 
 def log_basic(logger=None):
+    """Basic logging decorator that only logs method entry/exit and errors.
+
+    A lightweight alternative to log_method when you don't need parameter tracing
+    and timing information.
+
+    Args:
+        logger: Optional logger instance. If None, tries to get logger from instance
+
+    Example:
+        @log_basic()
+        async def simple_operation(self):
+            # Only logs:
+            # - "Entering simple_operation"
+            # - "Exiting simple_operation"
+            # - Errors if they occur
+    """
+
     def decorator(func):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
@@ -240,11 +257,12 @@ def log_basic(logger=None):
                 return await func(*args, **kwargs)
 
             try:
+                current_logger.debug(f"Entering {method_name}")
                 result = await func(*args, **kwargs)
-                current_logger.log_basic_call(method_name, result=result)
+                current_logger.debug(f"Exiting {method_name}")
                 return result
             except Exception as e:
-                current_logger.log_basic_call(method_name, error=e)
+                current_logger.error(f"Error in {method_name}: {str(e)}")
                 raise
 
         @wraps(func)
@@ -256,11 +274,12 @@ def log_basic(logger=None):
                 return func(*args, **kwargs)
 
             try:
+                current_logger.debug(f"Entering {method_name}")
                 result = func(*args, **kwargs)
-                current_logger.log_basic_call(method_name, result=result)
+                current_logger.debug(f"Exiting {method_name}")
                 return result
             except Exception as e:
-                current_logger.log_basic_call(method_name, error=e)
+                current_logger.error(f"Error in {method_name}: {str(e)}")
                 raise
 
         return async_wrapper if inspect.iscoroutinefunction(func) else sync_wrapper

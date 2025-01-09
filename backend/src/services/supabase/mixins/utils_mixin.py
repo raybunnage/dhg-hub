@@ -17,4 +17,21 @@ class UtilsMixin:
         """Validate table name."""
         # ... existing _validate_table_name implementation ...
 
+    @log_method()
+    async def rpc(self, function_name: str, params: dict = None) -> Any:
+        """Call a Postgres function via RPC.
+
+        Args:
+            function_name: Name of the function to call
+            params: Optional parameters for the function
+
+        Returns:
+            Any: Function result
+        """
+        try:
+            response = await self.supabase.rpc(function_name, params or {}).execute()
+            return response.data
+        except Exception as e:
+            raise SupabaseError(f"RPC call to {function_name} failed", original_error=e)
+
     # Add other utility methods

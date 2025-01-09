@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List, Callable
 from ...core.base_logging import log_method
 from ...core.exceptions import (
     SupabaseAuthenticationError,
@@ -155,3 +155,54 @@ class AuthMixin:
             raise map_auth_error(e)
         except Exception as e:
             raise SupabaseAuthenticationError("Failed to update user", original_error=e)
+
+    @log_method()
+    async def verify_email(self, token: str, email: str) -> bool:
+        """Verify email with token."""
+        try:
+            await self.supabase.auth.verify_otp(
+                {"email": email, "token": token, "type": "email"}
+            )
+            return True
+
+        except AuthApiError as e:
+            raise map_auth_error(e)
+        except Exception as e:
+            raise SupabaseEmailVerificationError(
+                "Email verification failed", original_error=e
+            )
+
+    @log_method()
+    async def set_current_domain(self, domain_id: Optional[str]) -> None:
+        """Set the current domain for subsequent Supabase operations.
+
+        Args:
+            domain_id: ID of the domain to set as current, or None to clear
+
+        Raises:
+            Exception: If the server returns an invalid response
+        """
+        try:
+            response = await self.supabase.rpc(
+                "set_current_domain", {"domain_id": domain_id}
+            ).execute()
+
+            if not hasattr(response, "data"):
+                raise Exception("Invalid response from server")
+        except Exception as e:
+            raise SupabaseAuthorizationError(
+                "Failed to set current domain", original_error=e
+            )
+
+    def _is_token_expiring_soon(self, token: str, threshold_minutes: int = 5) -> bool:
+        """Check if the JWT token is close to expiring.
+
+        Args:
+            token: JWT token to check
+            threshold_minutes: Minutes before expiration to consider "soon"
+
+        Returns:
+            bool: True if token expires within threshold
+        """
+        # Add JWT expiration checking logic
+        pass
