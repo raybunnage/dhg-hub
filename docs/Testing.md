@@ -1,5 +1,3 @@
-
-
 # Supabase Service Testing Guide
 
 ## Overview
@@ -18,12 +16,125 @@ We use pytest as our primary testing framework due to its powerful features:
 ### 1. Fixtures
 Fixtures are reusable setup functions that provide test data or objects:
 
+Key points:
+- Fixtures run before each test that requests them
+- They provide clean, isolated test environments
+- Can be shared across multiple test files using `conftest.py`
+- Can be scoped to function, class, module, or session
+
+### 2. Mocking
+We use Python's `unittest.mock` library to create test doubles:
+
+#### Mock Types:
+- `Mock()`: General-purpose mock object
+- `AsyncMock()`: For mocking async functions
+- `patch()`: For temporarily replacing objects
+
+Example:
+
+
+### 3. Async Testing
+For testing async functions:
 
 
 
+Key points:
+- Use `@pytest.mark.asyncio` decorator
+- Always await async functions
+- Use `AsyncMock()` for mocking async methods
+
+### 4. Test Organization
+
+#### Unit Tests
+Test individual components in isolation:
+
+
+Key points:
+- Use `@pytest.mark.asyncio` decorator
+- Always await async functions
+- Use `AsyncMock()` for mocking async methods
+
+### 4. Test Organization
+
+#### Unit Tests
+Test individual components in isolation:
 
 
 
+Key aspects:
+- Tests real interactions between components
+- May require more complex setup
+- Often slower than unit tests
+
+### 5. Error Testing
+Testing error conditions:
+
+
+Best practices:
+- Test both success and failure paths
+- Verify error messages and types
+- Test edge cases and boundary conditions
+
+### 6. Property-Based Testing
+Using hypothesis for generating test cases:
+
+
+
+Benefits:
+- Finds edge cases automatically
+- Reduces test writing time
+- Improves test coverage
+
+## Test Structure Best Practices
+
+### 1. File Organization
+
+
+
+### 2. Naming Conventions
+- Test files: `test_*.py`
+- Test classes: `Test*`
+- Test methods: `test_*`
+- Descriptive names indicating scenario being tested
+
+### 3. Test Method Structure
+
+
+## Advanced Testing Techniques
+
+### 1. Parametrized Testing
+
+
+### 2. Mock Response Chaining
+
+
+### 3. Context Manager Testing
+
+
+## Common Testing Patterns
+
+### 1. Setup/Teardown
+
+
+### 2. Shared State Management
+
+
+### 3. Error Injection
+
+
+## Testing Tips
+
+1. **Isolation**: Each test should be independent
+2. **Readability**: Tests serve as documentation
+3. **Maintenance**: Keep tests simple and focused
+4. **Coverage**: Aim for high coverage but focus on critical paths
+5. **Performance**: Group slow tests and run separately when needed
+
+## Running Tests
+
+```
+
+This documentation provides a comprehensive overview of the testing techniques used in our Supabase service implementation. Would you like me to expand on any particular aspect?
 
 
 
