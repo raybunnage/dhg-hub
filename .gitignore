@@ -62,3 +62,29 @@ htmlcov/
 
 
 
+
+# Consolidated rules from removed .gitignore files
+!.vscode/extensions.json
+*
+*.local
+*.log
+*.log 
+*.njsproj
+*.ntvs*
+*.sln
+*.suo
+*.sw?
+.idea
+.pytest_cache/
+.vscode/*
+dist
+dist-ssr
+lerna-debug.log*
+logs
+node_modules
+pnpm-debug.log*
+
+# macOS system files
+**/.DS_Store
+._.DS_Store
+**/._.DS_Store

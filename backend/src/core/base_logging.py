@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 import inspect
 from pathlib import Path
+import os
 
 
 class LoggerInterface(ABC):
@@ -81,8 +82,27 @@ class LoggerInterface(ABC):
 class Logger(LoggerInterface):
     def __init__(self, name: str = __name__):
         self._logger = logging.getLogger(name)
-        self._log_dir = Path("logs")
-        self._log_dir.mkdir(exist_ok=True)
+
+        # Determine log directory based on environment
+        if os.name == "posix":  # Linux/Unix
+            self._log_dir = Path("/var/log/dhg-hub")
+        else:  # Windows
+            self._log_dir = (
+                Path(os.environ.get("PROGRAMDATA", "C:\\ProgramData"))
+                / "dhg-hub"
+                / "logs"
+            )
+
+        # Ensure log directory exists and has correct permissions
+        try:
+            self._log_dir.mkdir(parents=True, exist_ok=True)
+            if os.name == "posix":
+                # Set proper permissions on Unix systems
+                os.chmod(self._log_dir, 0o755)
+        except PermissionError:
+            # Fallback to user's home directory if we don't have permission
+            self._log_dir = Path.home() / ".your_app_name" / "logs"
+            self._log_dir.mkdir(parents=True, exist_ok=True)
 
         # Configure console handler
         console_handler = logging.StreamHandler()
