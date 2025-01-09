@@ -3,6 +3,180 @@
 
 [← Back to Main Documentation](./README.MD)
 
+
+# Common Development Commands
+
+## Initial Setup Commands
+
+### 1. Activate Virtual Environment
+```bash
+source .venv/bin/activate
+```
+**When to use**: Run this first before doing any Python development work. This creates an isolated environment for your project's dependencies.
+
+### 2. Check Python Location
+```bash
+which python
+```
+**When to use**: Run this to verify you're using the correct Python installation from your virtual environment.
+
+## Dependency Management
+
+### 1. Generate Requirements Files
+```bash
+# For main dependencies
+uv pip compile pyproject.toml -o requirements.txt
+
+# For development dependencies
+uv pip compile pyproject.toml --extra dev -o requirements-dev.txt
+```
+**When to use**: Run these when you've added new dependencies to your `pyproject.toml` file and need to update the requirements files.
+
+### 2. Install Dependencies
+```bash
+# Install everything (both main and dev dependencies)
+uv pip install -r requirements.txt -r requirements-dev.txt
+
+# Install main project dependencies
+uv pip install -e .
+
+# Install development dependencies
+uv pip install -e ".[dev]"
+```
+**When to use**: 
+- Run after cloning the project for the first time
+- Run after pulling changes that include new dependencies
+- The `-e` flag installs in "editable" mode, meaning changes to the code are reflected immediately
+
+## Project Structure Setup
+```bash
+# Create necessary Python package directories
+touch backend/src/__init__.py
+touch backend/src/dhg/__init__.py
+touch backend/src/dhg/api/__init__.py
+touch backend/src/dhg/core/__init__.py
+touch backend/src/dhg/models/__init__.py
+touch backend/src/dhg/services/__init__.py
+touch backend/src/dhg/services/supabase/__init__.py
+```
+**When to use**: Run these commands when setting up the project structure for the first time. The `touch` command creates empty files that Python needs to recognize directories as packages.
+
+## Testing
+```bash
+pytest tests/test_imports.py -v -s
+```
+**When to use**: Run this to test if your Python imports are working correctly. The flags mean:
+- `-v`: verbose output (shows more details)
+- `-s`: allows print statements to be displayed in the output
+
+## Pro Tips for Beginners
+1. Always make sure your virtual environment is activated (you should see `(.venv)` in your terminal prompt)
+2. Run commands one at a time and make sure each succeeds before moving to the next
+3. If you get errors, read the error message carefully - they often tell you exactly what's wrong
+4. Keep these commands handy - you'll use them frequently during development
+
+
+
+### 2. Check Python Location
+```bash
+which python
+```
+**When to use**: Run this to verify you're using the correct Python installation from your virtual environment.
+
+When to use: Run this to verify you're using the correct Python installation from your virtual environment.
+Dependency Management
+
+1. Generate Requirements Files
+
+# For main dependencies
+uv pip compile pyproject.toml -o requirements.txt
+
+# For development dependencies
+uv pip compile pyproject.toml --extra dev -o requirements-dev.txt
+
+When to use: Run these when you've added new dependencies to your pyproject.toml file and need to update the requirements files.
+2. Install Dependencies
+
+# Install everything (both main and dev dependencies)
+uv pip install -r requirements.txt -r requirements-dev.txt
+
+# Install main project dependencies
+uv pip install -e .
+
+# Install development dependencies
+uv pip install -e ".[dev]"
+
+When to use:
+Run after cloning the project for the first time
+Run after pulling changes that include new dependencies
+The -e flag installs in "editable" mode, meaning changes to the code are reflected immediately
+Project Structure Setup
+
+# Create necessary Python package directories
+touch backend/src/__init__.py
+touch backend/src/dhg/__init__.py
+touch backend/src/dhg/api/__init__.py
+touch backend/src/dhg/core/__init__.py
+touch backend/src/dhg/models/__init__.py
+touch backend/src/dhg/services/__init__.py
+touch backend/src/dhg/services/supabase/__init__.py
+
+When to use: Run these commands when setting up the project structure for the first time. The touch command creates empty files that Python needs to recognize directories as packages.
+
+Testing
+
+pytest tests/test_imports.py -v -s
+
+
+When to use: Run this to test if your Python imports are working correctly. The flags mean:
+-v: verbose output (shows more details)
+-s: allows print statements to be displayed in the output
+Pro Tips for Beginners
+Always make sure your virtual environment is activated (you should see (.venv) in your terminal prompt)
+Run commands one at a time and make sure each succeeds before moving to the next
+If you get errors, read the error message carefully - they often tell you exactly what's wrong
+Keep these commands handy - you'll use them frequently during development
+
+
+## Frequent Commands
+
+## Git Commands
+- `git checkout -b feature/name` - Creates and switches to a new branch
+  - Use when starting work on a new feature or bugfix
+  - Replace "name" with a descriptive branch name
+
+- `git add .` - Stages all changed files for commit
+  - Use before committing to include all your changes
+  - Be careful as this includes ALL changes in current directory
+
+- `git commit -m "message"` - Commits staged changes
+  - Use to save your changes with a descriptive message
+  - Keep messages clear and concise
+
+- `git push origin branch-name` - Pushes commits to remote repository
+  - Use when ready to share your changes with the team
+  - Replace "branch-name" with your current branch
+
+## Testing Commands
+- `npm test` - Runs all tests
+  - Use during development to ensure code quality
+  - Run before submitting pull requests
+
+- `npm run test:watch` - Runs tests in watch mode
+  - Use during active development
+  - Tests automatically rerun when files change
+
+## Build Commands
+- `npm run build` - Creates production build
+  - Use when preparing code for deployment
+  - Optimizes and minifies code
+
+- `npm run dev` - Starts development server
+  - Use during local development
+  - Provides hot-reloading for faster development
+
+// ... rest of file remains unchanged ...
+
 ## Documentation Structure
 The following documentation sections will be expanded:
 
