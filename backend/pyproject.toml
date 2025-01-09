@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "your-project-name"
+name = "dhg-hub"
 version = "0.1.0"
 dependencies = [
     "fastapi",

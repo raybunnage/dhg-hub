@@ -88,3 +88,11 @@ pnpm-debug.log*
 **/.DS_Store
 ._.DS_Store
 **/._.DS_Store
+
+# Remove or comment out the scripts exclusion
+# scripts/  # Remove this line if it exists
+
+# Instead, be specific about what to ignore in scripts
+scripts/**/*.pyc
+scripts/**/__pycache__/
+scripts/**/.pytest_cache/
