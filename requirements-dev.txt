@@ -4,7 +4,7 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.8.0
     # via
-    #   httpx
+    #   httpcore
     #   starlette
 black==24.2.0
     # via dhg-hub (pyproject.toml)
@@ -12,63 +12,97 @@ certifi==2024.12.14
     # via
     #   httpcore
     #   httpx
+    #   requests
+charset-normalizer==3.4.1
+    # via requests
 click==8.1.8
-    # via black
+    # via
+    #   black
+    #   click-log
+    #   python-semantic-release
+click-log==0.4.0
+    # via python-semantic-release
+colorama==0.4.6
+    # via twine
 coverage==7.6.10
     # via pytest-cov
 deprecation==2.1.0
     # via postgrest
+docutils==0.21.2
+    # via readme-renderer
+dotty-dict==1.3.1
+    # via python-semantic-release
 fastapi==0.110.0
     # via dhg-hub (pyproject.toml)
 flake8==7.1.1
     # via dhg-hub (pyproject.toml)
-gotrue==2.9.1
+gitdb==4.0.12
+    # via gitpython
+gitpython==3.1.44
+    # via python-semantic-release
+gotrue==1.3.1
     # via supabase
 h11==0.14.0
     # via httpcore
-h2==4.1.0
+httpcore==0.16.3
     # via httpx
-hpack==4.0.0
-    # via h2
-httpcore==1.0.7
-    # via httpx
-httpx==0.25.2
+httpx==0.23.3
     # via
     #   gotrue
     #   postgrest
     #   storage3
     #   supabase
     #   supafunc
-hyperframe==6.0.1
-    # via h2
 idna==3.10
     # via
     #   anyio
-    #   httpx
+    #   requests
+    #   rfc3986
+importlib-metadata==8.5.0
+    # via twine
 iniconfig==2.0.0
     # via pytest
+invoke==1.7.3
+    # via python-semantic-release
 isort==5.13.2
     # via dhg-hub (pyproject.toml)
+jaraco-classes==3.4.0
+    # via keyring
+jaraco-context==6.0.1
+    # via keyring
+jaraco-functools==4.1.0
+    # via keyring
+keyring==25.6.0
+    # via twine
 mccabe==0.7.0
     # via flake8
+more-itertools==10.5.0
+    # via
+    #   jaraco-classes
+    #   jaraco-functools
 mypy==1.8.0
     # via dhg-hub (pyproject.toml)
 mypy-extensions==1.0.0
     # via
     #   black
     #   mypy
+nh3==0.2.20
+    # via readme-renderer
 packaging==24.2
     # via
     #   black
     #   deprecation
     #   pytest
+    #   python-semantic-release
 pathspec==0.12.1
     # via black
+pkginfo==1.12.0
+    # via twine
 platformdirs==4.3.6
     # via black
 pluggy==1.5.0
     # via pytest
-postgrest==0.15.1
+postgrest==0.10.7
     # via supabase
 pycodestyle==2.12.1
     # via flake8
@@ -82,6 +116,8 @@ pydantic-core==2.16.2
     # via pydantic
 pyflakes==3.2.0
     # via flake8
+pygments==2.19.1
+    # via readme-renderer
 pytest==8.0.2
     # via
     #   dhg-hub (pyproject.toml)
@@ -92,24 +128,57 @@ python-dateutil==2.8.2
     # via
     #   realtime
     #   storage3
+python-dotenv==1.0.1
+    # via dhg-hub (pyproject.toml)
+python-gitlab==3.15.0
+    # via python-semantic-release
+python-semantic-release==7.33.2
+    # via supabase
+readme-renderer==44.0
+    # via twine
 realtime==1.0.6
     # via supabase
+requests==2.32.3
+    # via
+    #   python-gitlab
+    #   python-semantic-release
+    #   requests-toolbelt
+    #   twine
+requests-toolbelt==1.0.0
+    # via
+    #   python-gitlab
+    #   twine
+rfc3986==1.5.0
+    # via
+    #   httpx
+    #   twine
+semver==2.13.0
+    # via python-semantic-release
 six==1.17.0
     # via python-dateutil
+smmap==5.0.2
+    # via gitdb
 sniffio==1.3.1
     # via
     #   anyio
+    #   httpcore
     #   httpx
 starlette==0.36.3
     # via fastapi
-storage3==0.7.7
+storage3==0.5.3
     # via supabase
 strenum==0.4.15
     # via postgrest
-supabase==2.3.4
+supabase==1.0.3
     # via dhg-hub (pyproject.toml)
-supafunc==0.3.3
+supafunc==0.2.2
     # via supabase
+tomlkit==0.13.2
+    # via python-semantic-release
+tqdm==4.67.1
+    # via twine
+twine==3.8.0
+    # via python-semantic-release
 typing-extensions==4.12.2
     # via
     #   anyio
@@ -119,5 +188,13 @@ typing-extensions==4.12.2
     #   pydantic-core
     #   realtime
     #   storage3
+urllib3==2.3.0
+    # via
+    #   requests
+    #   twine
 websockets==12.0
     # via realtime
+wheel==0.45.1
+    # via python-semantic-release
+zipp==3.21.0
+    # via importlib-metadata
