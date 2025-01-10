@@ -1,5 +1,0 @@
-{
-  "scripts": {
-    "check": "./scripts/check-backend.sh"
-  }
-} 
