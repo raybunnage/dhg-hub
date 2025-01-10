@@ -322,7 +322,7 @@ def map_storage_error(error: StorageException) -> SupabaseStorageError:
 
 
 class SupabaseOperationalError(Exception):
-    """Raised when there's an operational error with Supabase."""
+    """Raised when a Supabase operation fails."""
 
     pass
 
@@ -335,5 +335,11 @@ class UserNotFoundError(Exception):
 
 class InvalidCredentialsError(Exception):
     """Raised when credentials are invalid."""
+
+    pass
+
+
+class SupabaseAuthorizationError(Exception):
+    """Raised when a Supabase authorization fails."""
 
     pass

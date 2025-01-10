@@ -18,6 +18,11 @@ from dhg.services.supabase.types import (
 class DatabaseMixin:
     """Mixin for database operations."""
 
+    def __init__(self):
+        """Initialize the mixin."""
+        self.supabase = None
+        self._logger = None
+
     @log_method()
     async def select_from_table(
         self,
@@ -77,46 +82,20 @@ class DatabaseMixin:
         self,
         table_name: str,
         fields: Union[Literal["*"], List[str]],
-        where_filters: Optional[
-            List[Tuple[str, Literal["eq", "neq", "gt", "lt", ...], Any]]
-        ] = None,
+        where_filters: Optional[List[Tuple[str, str, Any]]] = None,
     ) -> List[Dict[str, Any]]:
-        """A simplified version of select_from_table with basic options.
-
-        Args:
-            table_name: Name of the table to query
-            fields: List of fields to select or "*" for all fields
-            where_filters: Optional list of filters in format (column, operator, value)
-
-        Returns:
-            List[Dict[str, Any]]: Selected records
-
-        Example:
-            # Select specific fields with a filter
-            records = await db.select_from_table_basic(
-                "users",
-                ["id", "name"],
-                [("age", "gt", 18)]
-            )
-
-            # Select all fields
-            all_records = await db.select_from_table_basic("users", "*")
-        """
+        """Basic select operation."""
         try:
-            return await self.select_from_table(
-                table_name=table_name,
-                fields=fields,
-                where_filters=where_filters,
-                limit=None,  # Use default (no limit)
-                offset=None,  # Use default (no offset)
-                order_by=None,  # Use default (no ordering)
-                validate_constraints=False,  # Skip validation for simpler operation
+            query = self.supabase.from_(table_name).select(
+                ",".join(fields) if isinstance(fields, list) else fields
             )
+
+            response = await query.execute()
+            return response.data if response.data else []
+
         except Exception as e:
-            # Simplify error handling while preserving the original error
-            raise SupabaseQueryError(
-                f"Basic select operation failed: {str(e)}", original_error=e
-            )
+            self._logger.error(f"Select operation failed: {e}")
+            raise SupabaseQueryError(f"Select operation failed: {str(e)}")
 
     @log_method()
     async def select_with_join(

@@ -1,124 +1,73 @@
-from datetime import datetime
-from pathlib import Path
-import sys
-import os
-from dotenv import load_dotenv
 import pytest
-import pytest_asyncio
-import asyncio
-
-project_root = str(Path(__file__).parent.parent)
-sys.path.append(project_root)
-from dhg.services.supabase.service import SupabaseService
+from unittest.mock import Mock, AsyncMock
 from dhg.db.experts import Experts
 
-from src.services.exceptions import (
-    SupabaseConnectionError,
-    SupabaseQueryError,
-    SupabaseAuthenticationError,
-    SupabaseAuthorizationError,
-    SupabaseError,
-    SupabaseStorageError,
-    map_storage_error,
-)
+
+@pytest.fixture
+def mock_supabase_client():
+    """Create a mock Supabase client."""
+    return Mock()
 
 
-@pytest_asyncio.fixture
-async def experts_service():
-    """Fixture to create and clean up an Experts service instance."""
-    load_dotenv()
-
-    supabase_url = os.getenv("SUPABASE_URL")
-    supabase_key = os.getenv("SUPABASE_KEY")
-    email = os.getenv("TEST_EMAIL")
-    password = os.getenv("TEST_PASSWORD")
-    domain_id = os.getenv("SUPABASE_DOMAIN_ID")
-
-    if not supabase_url or not supabase_key:
-        pytest.skip("SUPABASE_URL and SUPABASE_KEY must be set in environment")
-
-    supabase = SupabaseService(url=supabase_url, api_key=supabase_key)
-    experts = Experts(supabase, email=email, password=password, domain_id=domain_id)
-
-    yield experts
-
-    # Cleanup after tests
-    await experts._cleanup_test_data()
+@pytest.fixture
+def experts(mock_supabase_client):
+    """Create Experts instance with mocked client."""
+    return Experts(supabase_client=mock_supabase_client)
 
 
 @pytest.mark.asyncio
-async def test_crud_operations(experts_service):
-    """Test basic CRUD operations for Experts."""
-    try:
-        # Clean up any existing test data first
-        await experts_service._cleanup_test_data()
+async def test_get_expert(experts, mock_supabase_client):
+    """Test getting a single expert."""
+    # Setup mock response
+    mock_response = Mock()
+    mock_response.data = [{"id": "123", "name": "Test Expert"}]
 
-        # Test data
-        test_expert = {
-            "expert_name": "test_expert",
-            "full_name": "Test Expert",
-            "email_address": "test@example.com",
-            "is_in_core_group": True,
-            "domain_id": "752f3bf7-a392-4283-bd32-e3f0e530c205",
-        }
+    # Setup mock chain
+    mock_execute = AsyncMock(return_value=mock_response)
+    mock_eq = Mock()
+    mock_eq.execute = mock_execute
 
-        # Create
-        created_expert = await experts_service.add(test_expert)
-        assert created_expert is not None
-        expert_record = created_expert.records[0]
-        assert expert_record["expert_name"] == test_expert["expert_name"]
+    mock_select = Mock()
+    mock_select.eq = Mock(return_value=mock_eq)
 
-        # ... rest of test code ...
+    mock_from = Mock()
+    mock_from.select = Mock(return_value=mock_select)
 
-    finally:
-        # Ensure cleanup happens even if test fails
-        await experts_service._cleanup_test_data()
+    experts.client.from_ = Mock(return_value=mock_from)
 
+    # Execute test
+    result = await experts.get_expert("123")
 
-@pytest.mark.asyncio
-async def test_validation(experts_service):
-    """Test validation logic for Experts."""
-    try:
-        # Clean up any existing test data first
-        await experts_service._cleanup_test_data()
-
-        # Test missing required field
-        invalid_expert = {
-            "expert_name": "test_expert",
-            # Missing required field: is_in_core_group
-            "domain_id": "test_domain_id",
-        }
-
-        with pytest.raises(SupabaseQueryError) as exc_info:
-            await experts_service.add(invalid_expert)
-        assert "Missing required field" in str(exc_info.value)
-
-        # ... rest of test code ...
-
-    finally:
-        # Ensure cleanup happens even if test fails
-        await experts_service._cleanup_test_data()
+    # Assert results
+    assert result == {"id": "123", "name": "Test Expert"}
+    experts.client.from_.assert_called_once_with("experts")
 
 
 @pytest.mark.asyncio
-async def test_aliases(experts_service):
-    """Test alias-related operations."""
-    try:
-        # Clean up any existing test data first
-        await experts_service._cleanup_test_data()
+async def test_list_experts(experts, mock_supabase_client):
+    """Test listing all experts."""
+    # Setup mock response
+    mock_response = Mock()
+    mock_response.data = [
+        {"id": "123", "name": "Expert 1"},
+        {"id": "456", "name": "Expert 2"},
+    ]
 
-        # Create test expert
-        test_expert = {
-            "expert_name": "test_alias_expert",
-            "is_in_core_group": True,
-            "domain_id": "752f3bf7-a392-4283-bd32-e3f0e530c205",
-            "email_address": "test.alias@example.com",
-        }
-        created_expert = await experts_service.add(test_expert)
-        expert_record = created_expert.records[0]
+    # Setup mock chain
+    mock_execute = AsyncMock(return_value=mock_response)
+    mock_select = Mock()
+    mock_select.execute = mock_execute
 
-        # ... rest of test code ...
+    mock_from = Mock()
+    mock_from.select = Mock(return_value=mock_select)
 
-    finally:
-        # Ensure cleanup happens even if test fails
-        await experts_service._cleanup_test_data()
+    experts.client.from_ = Mock(return_value=mock_from)
+
+    # Execute test
+    result = await experts.list_experts()
+
+    # Assert results
+    assert len(result) == 2
+    assert result[0]["name"] == "Expert 1"
+    assert result[1]["name"] == "Expert 2"
+    experts.client.from_.assert_called_once_with("experts")

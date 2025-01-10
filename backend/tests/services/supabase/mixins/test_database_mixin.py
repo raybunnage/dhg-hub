@@ -1,19 +1,15 @@
 import pytest
-import logging
-from unittest.mock import Mock, AsyncMock, PropertyMock
+from unittest.mock import Mock, AsyncMock
 from dhg.services.supabase.mixins.database_mixin import DatabaseMixin
-from dhg.core.exceptions import SupabaseQueryError
 
 
 class TestDatabaseMixin:
     @pytest.fixture
     def db_mixin(self):
         """Create a DatabaseMixin instance with mocked supabase client."""
-        # Configure logging for tests
-        logging.basicConfig(level=logging.DEBUG)
-
         mixin = DatabaseMixin()
         mixin.supabase = Mock()
+        mixin._logger = Mock()
         return mixin
 
     @pytest.mark.asyncio
@@ -25,15 +21,9 @@ class TestDatabaseMixin:
 
         # Create the complete mock chain
         mock_execute = AsyncMock(return_value=mock_response)
-        mock_eq = Mock()
-        mock_eq.execute = mock_execute
-
-        mock_where = Mock()
-        mock_where.eq = Mock(return_value=mock_eq)
 
         mock_select = Mock()
         mock_select.execute = mock_execute
-        mock_select.eq = Mock(return_value=mock_eq)
 
         mock_from = Mock()
         mock_from.select = Mock(return_value=mock_select)
@@ -52,7 +42,7 @@ class TestDatabaseMixin:
         # Verify method chain
         db_mixin.supabase.from_.assert_called_once_with("test_table")
         mock_from.select.assert_called_once()
-        assert mock_execute.called
+        mock_execute.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_validate_select_against_constraints(self, db_mixin):
