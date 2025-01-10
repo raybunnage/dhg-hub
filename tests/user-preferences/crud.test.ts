@@ -1,17 +1,63 @@
-import { describe, expect, it, beforeEach, afterEach } from '@jest/globals';
+import { describe, expect, it, beforeEach, afterEach, beforeAll } from '@jest/globals';
 import { createClient, User } from '@supabase/supabase-js';
+import * as dotenv from 'dotenv';
+import { resolve } from 'path';
 
-// More graceful handling of missing env vars
-const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'your-default-anon-key';
+// Explicitly use backend .env
+const backendEnvPath = resolve(process.cwd(), 'backend', '.env');
+console.log('\n=== Environment Setup ===');
+console.log('Loading .env from:', backendEnvPath);
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Only load the backend .env
+dotenv.config({ path: backendEnvPath });
+
+// Debug output
+console.log('\nEnvironment Variables from backend/.env:');
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? '✓ Set' : '✗ Missing');
+console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_KEY ? '✓ Set' : '✗ Missing');
+
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+    console.error('\nError: Environment variables not found in backend/.env');
+    throw new Error('Missing required environment variables in backend/.env');
+}
+
+// Create client with backend credentials
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY
+);
+
+// Add debug logging
+console.log('Attempting to connect to:', process.env.SUPABASE_URL);
+
+// Add more detailed logging
+console.log('Environment check:');
+console.log('- SUPABASE_URL:', process.env.SUPABASE_URL ? '✓ Set' : '✗ Missing');
+console.log('- SUPABASE_ANON_KEY:', process.env.SUPABASE_KEY ? '✓ Set' : '✗ Missing');
+
+// Add key format verification
+const anonKey = process.env.SUPABASE_ANON_KEY || '';
+console.log('API Key format check:');
+console.log('- Starts with "eyJ":', anonKey.startsWith('eyJ') ? '✓' : '✗');
+console.log('- Length > 100:', anonKey.length > 100 ? '✓' : '✗');
+
+// Test the connection before running tests
+beforeAll(async () => {
+  try {
+    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+    if (error) throw error;
+    console.log('Successfully connected to Supabase');
+  } catch (error) {
+    console.error('Failed to connect to Supabase:', error);
+    throw error;
+  }
+});
 
 describe('Profile Preferences', () => {
   let testUser: User | null = null;
 
   beforeEach(async () => {
-    // Create a new test user before each test
+    // Creates a unique test user before each test
     const { data: { user }, error } = await supabase.auth.signUp({
       email: `test-${Date.now()}@example.com`,
       password: 'test123456'
@@ -21,7 +67,7 @@ describe('Profile Preferences', () => {
   });
 
   afterEach(async () => {
-    // Cleanup after each test
+    // Cleanup: Deletes test user and their profile after each test
     if (testUser?.id) {
       await supabase.from('profiles').delete().eq('id', testUser.id);
       await supabase.auth.admin.deleteUser(testUser.id);
