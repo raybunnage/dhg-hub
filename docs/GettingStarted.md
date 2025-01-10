@@ -28,7 +28,26 @@ pip freeze | grep pydantic
 ```bash
 source .venv/bin/activate
 ```
+
 **When to use**: Always run this first before any development work. Creates an isolated environment for your project.
+
+## Run Tests 
+pytest backend/tests -v -s
+pytest backend/tests -v -s --cov=backend/src/dhg
+pytest backend/tests -v -s --tb=long
+pytest backend/tests -v -s -x
+pytest backend/tests -v -s --showlocals
+pytest backend/tests -v -s -x --showlocals
+
+
+pytest backend/tests/test_imports.py -v -s --showlocals
+pytest backend/tests/services/supabase/mixins/test_utils_mixin.py -v -s --showlocals
+pytest backend/tests/services/supabase/test_integration.py -v -s --showlocals
+pytest backend/tests/test_experts.py -v -s --showlocals
+pytest backend/tests/test_supabase_service.py -v -s --showlocals
+pytest backend/tests/test_uni_document_types.py -v -s --showlocals
+pytest backend/tests/unit/test_supabase_service.py -v -s --showlocals
+
 
 **Tip**: You should see `(.venv)` in your terminal prompt when activated.
 

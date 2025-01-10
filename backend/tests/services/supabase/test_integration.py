@@ -1,5 +1,5 @@
 import pytest
-from src.services.supabase.service import SupabaseService
+from dhg.services.supabase.service import SupabaseService
 from hypothesis import given, strategies as st
 
 

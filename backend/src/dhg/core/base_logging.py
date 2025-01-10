@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Callable
 from functools import wraps
 import logging
 from datetime import datetime
@@ -7,6 +7,8 @@ import time
 import inspect
 from pathlib import Path
 import os
+import functools
+import asyncio
 
 
 class LoggerInterface(ABC):
@@ -194,57 +196,83 @@ class Logger(LoggerInterface):
             self._logger.info(f"method={method_name} - result={result}")
 
 
-def log_method(logger: Optional[LoggerInterface] = None):
-    """Decorator to automatically log method entry/exit with parameters and timing"""
+class CustomLogger(logging.Logger):
+    """Custom logger with method call logging."""
 
-    def decorator(func):
-        @wraps(func)
+    def log_method_call(
+        self,
+        method_name: str,
+        args: tuple,
+        kwargs: dict,
+        duration: float,
+        result: Any = None,
+        error: Optional[Exception] = None,
+    ):
+        """Log a method call with its arguments and result."""
+        if error:
+            self.error(
+                f"{method_name} failed after {duration:.4f}s: {str(error)}"
+                f"\nArgs: {args}, Kwargs: {kwargs}"
+            )
+        else:
+            self.debug(
+                f"{method_name} completed in {duration:.4f}s"
+                f"\nArgs: {args}, Kwargs: {kwargs}"
+                f"\nResult: {result}"
+            )
+
+
+# Register our custom logger class
+logging.setLoggerClass(CustomLogger)
+
+
+def log_method(level: int = logging.DEBUG) -> Callable:
+    """Decorator for logging method calls."""
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
             start_time = time.time()
             method_name = func.__name__
-            current_logger = logger or getattr(args[0], "_logger", None)
 
-            if not current_logger:
-                return await func(*args, **kwargs)
+            # Get logger from instance or create new one
+            if args and hasattr(args[0], "_logger"):
+                logger = args[0]._logger
+            else:
+                logger = logging.getLogger(func.__module__)
 
             try:
                 result = await func(*args, **kwargs)
                 duration = time.time() - start_time
-                current_logger.log_method_call(
-                    method_name, args, kwargs, duration, result
-                )
+                logger.log_method_call(method_name, args, kwargs, duration, result)
                 return result
             except Exception as e:
                 duration = time.time() - start_time
-                current_logger.log_method_call(
-                    method_name, args, kwargs, duration, error=e
-                )
+                logger.log_method_call(method_name, args, kwargs, duration, error=e)
                 raise
 
-        @wraps(func)
+        @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
             start_time = time.time()
             method_name = func.__name__
-            current_logger = logger or getattr(args[0], "_logger", None)
 
-            if not current_logger:
-                return func(*args, **kwargs)
+            # Get logger from instance or create new one
+            if args and hasattr(args[0], "_logger"):
+                logger = args[0]._logger
+            else:
+                logger = logging.getLogger(func.__module__)
 
             try:
                 result = func(*args, **kwargs)
                 duration = time.time() - start_time
-                current_logger.log_method_call(
-                    method_name, args, kwargs, duration, result
-                )
+                logger.log_method_call(method_name, args, kwargs, duration, result)
                 return result
             except Exception as e:
                 duration = time.time() - start_time
-                current_logger.log_method_call(
-                    method_name, args, kwargs, duration, error=e
-                )
+                logger.log_method_call(method_name, args, kwargs, duration, error=e)
                 raise
 
-        return async_wrapper if inspect.iscoroutinefunction(func) else sync_wrapper
+        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
 
     return decorator
 

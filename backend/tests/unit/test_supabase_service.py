@@ -5,11 +5,10 @@ from dotenv import load_dotenv
 import pytest
 import pytest_asyncio
 
-from services.exceptions import (
-    SupabaseConnectionError,
-    SupabaseQueryError,
-    SupabaseAuthenticationError,
-    SupabaseAuthorizationError,
+from dhg.core.exceptions import (
+    SupabaseOperationalError,
+    UserNotFoundError,
+    InvalidCredentialsError,
 )
 from services.supabase.service import SupabaseService
 

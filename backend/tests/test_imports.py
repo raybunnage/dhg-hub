@@ -1,29 +1,27 @@
 """Test module for verifying import functionality and basic setup."""
 
-import sys
+import pytest
 import os
 from pathlib import Path
 
-# Adjust the path to point to backend from the new location
-backend_path = Path(__file__).parent.parent
-sys.path.append(str(backend_path))
+
+def test_core_imports():
+    """Test core module imports."""
+    from dhg.core import config
+    from dhg.core import exceptions
+
+    assert True
 
 
-def test_imports():
-    """Test that we can import our main package and its submodules."""
-    try:
-        import flask
-        import flask_cors
-        import flask_sqlalchemy
-        import sqlalchemy
-        import pytest
-        import dotenv
+def test_service_imports():
+    """Test service module imports."""
+    from dhg.services.supabase import service
 
-        assert True
-    except ImportError as e:
-        assert False, f"Failed to import required package: {str(e)}"
+    assert True
 
 
-def test_basic_math():
-    """A simple test to verify pytest is working."""
-    assert 1 + 1 == 2, "Basic math test failed"
+def test_package_structure():
+    """Test package structure."""
+    base = Path(__file__).parent.parent / "src" / "dhg"
+    assert (base / "core").exists()
+    assert (base / "services").exists()

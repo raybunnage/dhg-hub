@@ -9,8 +9,8 @@ import asyncio
 
 project_root = str(Path(__file__).parent.parent)
 sys.path.append(project_root)
-from src.services.supabase_service import SupabaseService
-from src.db.experts import Experts
+from dhg.services.supabase.service import SupabaseService
+from dhg.db.experts import Experts
 
 from src.services.exceptions import (
     SupabaseConnectionError,
