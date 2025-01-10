@@ -308,3 +308,106 @@ Here's a complete example of implementing a new feature using TDD with AI assist
 ```
 
 This workflow ensures complete test coverage from the start and maintains code quality throughout the development process.
+
+
+## Project-Specific Considerations
+
+### FastAPI Route Testing
+- Use `TestClient` for endpoint testing
+- Test both synchronous and asynchronous routes
+- Verify Supabase integration points
+- Test authentication/authorization flows
+- Validate response models match Pydantic schemas
+
+### Supabase Testing Strategy
+1. **Mock vs. Real Database**
+   - Use test database for integration tests
+   - Mock Supabase client for unit tests
+   - Create isolated test data
+
+2. **Authentication Testing**
+   - Test JWT token validation
+   - Verify role-based access
+   - Test session management
+
+3. **Data Consistency**
+   - Verify triggers and RLS policies
+   - Test data cascading
+   - Validate foreign key constraints
+
+### CLI Testing
+- Test command-line interface functions
+- Verify environment configuration handling
+- Test database initialization commands
+- Validate migration scripts
+
+### Service Layer Specifics
+- Test chat history management
+- Verify embedding generation and storage
+- Test vector search functionality
+- Validate conversation context handling
+
+### AI Integration Testing
+1. **Mock AI Responses**
+
+
+python
+@pytest.fixture
+def mock_ai_response():
+return {
+"content": "Test response",
+"role": "assistant",
+"metadata": {...}
+}
+
+  
+2. **Test Conversation Flow**
+- Verify context window management
+- Test prompt construction
+- Validate response parsing
+- Test error recovery
+
+### Common Test Fixtures
+
+python
+@pytest.fixture
+async def test_db():
+"""Provides isolated test database"""
+# Setup test database
+yield db
+# Cleanup
+@pytest.fixture
+async def authenticated_client():
+"""TestClient with authentication"""
+client = TestClient(app)
+# Add auth headers
+return client
+@pytest.fixture
+def sample_conversation():
+"""Creates test conversation data"""
+return {
+"conversation_id": "test-id",
+"messages": [...]
+}
+
+
+### Coverage Priorities
+1. **Critical Paths**
+   - Authentication flows
+   - Conversation management
+   - Vector search operations
+   - Data persistence
+
+2. **Error Scenarios**
+   - AI service unavailability
+   - Database connection issues
+   - Invalid authentication
+   - Malformed requests
+
+3. **Edge Cases**
+   - Large conversation histories
+   - Rate limiting scenarios
+   - Concurrent access patterns
+
+   These additions provide more specific guidance for your project's unique requirements, particularly around AI chat functionality, Supabase integration, and FastAPI implementation. They can be integrated into the existing document structure, either as new sections or merged into relevant existing sections.
+Would you like me to suggest where specifically these sections should be inserted in the existing document?
