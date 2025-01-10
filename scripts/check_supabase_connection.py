@@ -20,24 +20,30 @@ def check_supabase_connection():
     # Load the .env file
     load_dotenv(env_path)
 
-    # Get and check credentials
-    supabase_url = os.getenv("VITE_SUPABASE_URL")
-    supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY")
+    # Use standard Supabase environment variables (no VITE prefix)
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_KEY")
 
-    print("\n=== Environment Variables ===")
-    print(f"SUPABASE_URL: {'[SET]' if supabase_url else '[NOT SET]'}")
+        # Get and check credentials
+    # supabase_url = os.getenv("VITE_SUPABASE_URL")
+    # supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY")
+
+
+    print("\n=== Environment Variables Debug ===")
+    print(f"Looking for .env at: {env_path}")
+    print(f"File exists: {env_path.exists()}")
+    print(f"SUPABASE_URL: {supabase_url if supabase_url else '[NOT SET]'}")
     print(f"SUPABASE_KEY: {'[SET]' if supabase_key else '[NOT SET]'}")
 
-    # If variables aren't set, try to read the file directly
+    # If variables aren't set, let's read the .env file directly to see what's in it
     if not all([supabase_url, supabase_key]):
-        print("\n=== Attempting to read .env file directly ===")
+        print("\n=== .env File Contents (sanitized) ===")
         try:
             with open(env_path, "r") as f:
-                print("First few lines of .env (with sensitive data redacted):")
                 for line in f:
                     if line.strip() and not line.startswith("#"):
-                        key = line.split("=")[0] if "=" in line else "INVALID_FORMAT"
-                        print(f"{key}=[REDACTED]")
+                        var_name = line.split("=")[0].strip()
+                        print(f"Found variable: {var_name}")
         except Exception as e:
             print(f"Error reading .env file: {e}")
 

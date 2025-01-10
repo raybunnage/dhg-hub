@@ -4,6 +4,13 @@
 
 ### Package Management Commands
 
+#### Virtual Environment Activation
+```bash
+source .venv/bin/activate
+```
+**When to use**: Always run this first before any development work. Creates an isolated environment for your project.
+
+
 #### Reinstalling the Package
 ```bash
 # Remove old installation
@@ -36,11 +43,6 @@ pip freeze | grep pydantic
 
 ### Development Environment
 
-#### Virtual Environment Activation
-```bash
-source .venv/bin/activate
-```
-**When to use**: Always run this first before any development work. Creates an isolated environment for your project.
 
 ### Testing Commands
 
