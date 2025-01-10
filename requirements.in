@@ -1,0 +1,15 @@
+# API Dependencies
+fastapi
+uvicorn
+
+# Database
+supabase
+postgrest
+
+# Testing
+pytest
+pytest-asyncio
+
+# Utils
+python-dotenv
+pydantic 

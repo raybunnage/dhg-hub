@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+.venv
+venv/
+ENV/
+
+# Node/React
+node_modules/
+/frontend/dist
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# Project specific
+file_types/
+/frontend/.env
+/backend/.env
+
+# Testing artifacts (but NOT the tests themselves)
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+coverage/
+
+# macOS
+**/.DS_Store
+._.DS_Store
+**/._.DS_Store
+
+# Scripts artifacts
+scripts/**/*.pyc
+scripts/**/__pycache__/
+scripts/**/.pytest_cache/

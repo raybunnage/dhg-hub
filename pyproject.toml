@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dhg-hub"
+version = "0.1.0"
+description = "The Dynamic Healing Group Hub for processing documents with AI"
+authors = [
+    { name = "Your Name", email = "your.email@example.com" },
+]
+dependencies = [
+    "fastapi>=0.100.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "supabase==1.0.3",
+    "python-dotenv>=1.0.0",
+    # Add other dependencies your project needs
+]
+requires-python = ">=3.9"
+license = "MIT"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend/src/dhg"]
+
+[tool.hatch.build]
+only-packages = true
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "backend/src"
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v --cov=dhg"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+ignore_missing_imports = true
+
+[project.urls]
+Homepage = "https://github.com/yourusername/dhg-hub"
+Repository = "https://github.com/yourusername/dhg-hub"
+Documentation = "https://github.com/yourusername/dhg-hub#readme"
+"Bug Tracker" = "https://github.com/yourusername/dhg-hub/issues"
+
+[project.scripts]
+dhg = "dhg.main:app"  # If you want CLI commands
+
+[tool.coverage.run]
+source = ["dhg"]
+omit = ["tests/*", "**/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # Ignore unused imports in __init__.py files
+"tests/*" = ["S101"]      # Ignore assert statements in tests
+
+[tool.mypy.overrides]
+module = [
+    "supabase.*",
+    "fastapi.*",
+]
+ignore_missing_imports = true
