@@ -1,9 +1,68 @@
 # Supabase Service Testing Guide
 
-## Overview
+## AI Conversation Best Practices
+Let me explain the common best practices for organizing tests in a full-stack project:
+
+### Recommended Test Structure
+The general best practice is to keep tests close to the code they're testing. For a typical full-stack project, this usually means:
+
+### Types of Tests & Their Location
+
+**Backend Tests** (`backend/tests/`)
+- Unit tests for backend services
+- API endpoint tests
+- Database tests
+- Backend integration tests
+
+**Frontend Tests** (`frontend/tests/` or within component directories)
+- Component unit tests
+- Hook tests
+- State management tests
+- Frontend integration tests
+
+**Root-level Tests** (`/tests/`)
+- End-to-end (E2E) tests
+- Full system integration tests
+- Cross-component tests
+- Import/dependency tests
+- Build/deployment tests
+
+### Recommendations
+1. Move the `test_imports.py` to `backend/tests/` if it's specifically testing backend imports. Keep it in the root `tests/` folder only if it's testing project-wide imports or cross-component functionality.
+
+2. Consider using testing frameworks that support this structure:
+   - Jest for frontend (can be configured with `jest.config.js`)
+   - Pytest for backend (can use `conftest.py` in different directories)
+   - Cypress or Playwright for E2E tests (typically in root `tests/` or separate `e2e/` directory)
+
+### Benefits of This Structure
+- **Locality**: Tests are close to the code they're testing
+- **Separation of Concerns**: Clear distinction between different types of tests
+- **Scalability**: Easy to add new tests without cluttering
+- **CI/CD friendly**: Easy to run specific test suites
+- **Maintainability**: Clear organization makes it easier for team members to find and update tests
+
+### Project Structure Example
+```
+your-project/
+├── backend/
+│   ├── src/
+│   │   └── ...
+│   └── tests/
+│       └── ... (backend specific tests)
+├── frontend/
+│   ├── src/
+│   │   └── ...
+│   └── tests/
+│       └── ... (frontend specific tests)
+└── tests/
+    └── ... (integration/e2e tests)
+```
+
+## Testing Framework Overview
 This guide explains the testing techniques used in our Supabase service implementation, covering unit tests, integration tests, and advanced testing patterns.
 
-## Testing Framework: pytest
+### Testing Framework: pytest
 We use pytest as our primary testing framework due to its powerful features:
 
 - Fixture system for test setup and dependency injection
@@ -11,9 +70,9 @@ We use pytest as our primary testing framework due to its powerful features:
 - Rich assertion capabilities
 - Plugin ecosystem
 
-## Core Testing Concepts
+### Core Testing Concepts
 
-### 1. Fixtures
+#### 1. Fixtures
 Fixtures are reusable setup functions that provide test data or objects:
 
 ```python
@@ -32,10 +91,10 @@ Key points:
 - Can be shared across multiple test files using `conftest.py`
 - Can be scoped to function, class, module, or session
 
-### 2. Mocking
+#### 2. Mocking
 We use Python's `unittest.mock` library to create test doubles:
 
-#### Mock Types:
+**Mock Types:**
 - `Mock()`: General-purpose mock object
 - `AsyncMock()`: For mocking async functions
 - `patch()`: For temporarily replacing objects
@@ -49,7 +108,7 @@ def test_something(mock_class):
     assert result == 'expected'
 ```
 
-### 3. Async Testing
+#### 3. Async Testing
 For testing async functions:
 
 ```python
@@ -64,9 +123,9 @@ Key points:
 - Always await async functions
 - Use `AsyncMock()` for mocking async methods
 
-### 4. Test Organization
+#### 4. Test Organization
 
-#### File Structure
+**File Structure**
 ```
 tests/
 ├── conftest.py           # Shared fixtures
@@ -79,13 +138,13 @@ tests/
 │       └── test_integration.py
 ```
 
-#### Naming Conventions
+**Naming Conventions**
 - Test files: `test_*.py`
 - Test classes: `Test*`
 - Test methods: `test_*`
 - Use descriptive names indicating scenario being tested
 
-### 5. Error Testing
+#### 5. Error Testing
 Test both success and failure scenarios:
 
 ```python
@@ -100,7 +159,7 @@ Best practices:
 - Verify error messages and types
 - Test edge cases and boundary conditions
 
-### 6. Property-Based Testing
+#### 6. Property-Based Testing
 Using hypothesis for generating test cases:
 
 ```python
@@ -115,7 +174,7 @@ def test_serialization(data):
     assert isinstance(result, list)
 ```
 
-### 7. Running Tests
+#### 7. Running Tests
 
 ```bash
 # Run all tests
@@ -131,7 +190,7 @@ pytest --cov=src
 pytest -m asyncio
 ```
 
-### 8. Testing Tips
+#### 8. Testing Tips
 
 1. **Isolation**: Each test should be independent and not rely on the state from other tests
 2. **Readability**: Tests serve as documentation - make them clear and descriptive
