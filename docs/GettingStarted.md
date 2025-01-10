@@ -11,6 +11,16 @@ uv pip install -e .       # Reinstall in editable mode
 
 diff pyproject.toml backend/pyproject.toml
 
+grep -r "from pydantic import Secret" backend/src/dhg/
+
+uv pip uninstall pydantic pydantic-settings
+uv pip install -e .
+
+# Verify installed versions
+pip freeze | grep pydantic
+
+
+
 
 ## Initial Setup
 
@@ -113,6 +123,25 @@ The following documentation sections will be expanded:
    - Environment Setup
    - Deployment Procedures
    - Monitoring and Maintenance
+
+
+Key changes made:
+Replaced class Config with model_config = SettingsConfigDict
+Added SecretStr for all sensitive fields like:
+API keys
+Passwords
+Private keys
+Authentication tokens
+Left non-sensitive fields as str
+When you need to use these values in your code:
+
+
+# Access the secret value
+secret_key = settings.supabase_key.get_secret_value()
+
+# Or just pass the SecretStr object directly to libraries that know how to handle it
+client = SomeClient(api_key=settings.openai_api_key)
+
 
 ## For New Developers
 This project is designed for intermediate developers looking to expand their full-stack development skills. Key areas to focus on:
