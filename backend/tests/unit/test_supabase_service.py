@@ -179,50 +179,49 @@ async def test_delete_operations(service: SupabaseService) -> None:
             "priority": 2,
         },
     ]
-    
+
     # Setup mock responses
     mock_insert = Mock()
     mock_insert.execute = AsyncMock(return_value=MockResponse([test_todos[0]]))
-    
+
     mock_delete = Mock()
     mock_delete.execute = AsyncMock(return_value=MockResponse([{"id": "1"}]))
     mock_delete.filter = Mock(return_value=mock_delete)
-    
+
     mock_select = Mock()
     mock_select.execute = AsyncMock(return_value=MockResponse([test_todos[1]]))
     mock_select.filter = Mock(return_value=mock_select)
-    
+
     # Setup mock table
     mock_table = Mock()
     mock_table.insert = Mock(return_value=mock_insert)
     mock_table.delete = Mock(return_value=mock_delete)
     mock_table.select = Mock(return_value=mock_select)
-    
+
     service.client.from_ = Mock(return_value=mock_table)
-    
+
     # Insert test records
     for todo in test_todos:
         insert_result = await service.insert_into_table("todos", todo)
         assert insert_result is not None, "Insert should return a result"
         assert len(insert_result) == 1, "Should insert one record"
-    
+
     # Delete first record
     delete_result = await service.delete_from_table(
-        "todos", 
-        where_filters=[("email", "eq", "delete1@test.com")]
+        "todos", where_filters=[("email", "eq", "delete1@test.com")]
     )
-    
+
     # Verify remaining records
     remaining_records = await service.select_from_table(
-        "todos", 
-        fields=["*"], 
-        where_filters=[("email", "like", "%delete%")]
+        "todos", fields=["*"], where_filters=[("email", "like", "%delete%")]
     )
-    
+
     # Assertions
     assert delete_result is not None, "Delete should return a result"
     assert len(remaining_records) == 1, "Should have one record remaining"
-    assert remaining_records[0]["email"] == "delete2@test.com", "Correct record should remain"
+    assert (
+        remaining_records[0]["email"] == "delete2@test.com"
+    ), "Correct record should remain"
 
 
 @pytest.mark.asyncio
@@ -398,25 +397,25 @@ async def test_domain_management(service):
     """Test domain management operations."""
     # Setup test data
     domain_data = {"id": "123", "name": "Dynamic Healing Group"}
-    
+
     # Setup mock chain for select
     mock_select = Mock()
     mock_select.execute = AsyncMock(return_value=MockResponse([domain_data]))
     mock_select.filter = Mock(return_value=mock_select)
     mock_select.eq = Mock(return_value=mock_select)
-    
+
     # Setup mock chain for update
     mock_update = Mock()
     mock_update.execute = AsyncMock(side_effect=Exception("Invalid domain"))
     mock_update.eq = Mock(return_value=mock_update)
-    
+
     # Setup mock table
     mock_table = Mock()
     mock_table.select = Mock(return_value=mock_select)
     mock_table.update = Mock(return_value=mock_update)
-    
+
     service.client.from_ = Mock(return_value=mock_table)
-    
+
     # Test valid domain select
     domains = await service.select_from_table(
         "domains",
@@ -424,7 +423,7 @@ async def test_domain_management(service):
         where_filters=[("name", "eq", "Dynamic Healing Group")],
     )
     assert domains[0]["id"] == "123"
-    
+
     # Test invalid domain update
     with pytest.raises(SupabaseOperationalError) as exc_info:
         await service.set_current_domain("invalid-id")
