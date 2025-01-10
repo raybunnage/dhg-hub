@@ -1,5 +1,6 @@
-I'll break down this testing structure and explain its organization in a beginner-friendly way.
-Testing Structure Overview
+# Testing Structure Overview
+
+## Directory Organization
 
 backend/tests/
 ├── core/                  # Core functionality tests
@@ -9,12 +10,12 @@ backend/tests/
 ├── unit/              # Unit tests
 └── various test files at root level
 
-Types of Tests Explained
-Unit Tests (/unit/)
 
+## Types of Tests Explained
+
+### 1. Unit Tests (`/unit/`)
 - Tests individual components in isolation
 - Fastest to run
-- Example: `test_supabase_service.py` tests individual methods of the Supabase service
 - Good for: Testing single functions or classes
 
 Example:
@@ -323,6 +324,7 @@ Test Running Options
 Why This Structure Matters
 Organization
 concerns
+
 Speed
 - Can run specific test types
 - Unit tests run faster than integration tests
