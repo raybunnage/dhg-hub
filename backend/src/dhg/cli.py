@@ -1,22 +1,24 @@
 import click
-from flask.cli import with_appcontext
+from flask.cli import with_appcontext, AppGroup
 import pytest
 import os
 from dotenv import load_dotenv
+
+test_cli = AppGroup("test", help="Testing commands.")
 
 
 def load_env_file(env_name):
     """Load the appropriate .env file."""
     if env_name == "test":
-        load_dotenv(".env.test")
+        load_dotenv(".env.test", override=True)
     else:
-        load_dotenv()
+        load_dotenv(override=True)
 
 
 def register_commands(app):
     """Register Flask CLI commands."""
 
-    @app.cli.command("test")
+    @test_cli.command("run")
     @click.option(
         "--coverage/--no-coverage", default=False, help="Run tests with coverage."
     )
@@ -33,6 +35,9 @@ def register_commands(app):
             os.path.join(os.path.dirname(__file__), "../../")
         )
 
+        click.echo(f"Running tests in {env} environment...")
+        click.echo(f"PYTHONPATH: {os.environ['PYTHONPATH']}")
+
         # Build pytest arguments
         args = ["backend/tests", "-v"]
 
@@ -40,7 +45,6 @@ def register_commands(app):
             args.extend(["--cov=backend/src", "--cov-report=term-missing"])
 
         # Clear caches before running tests
-        click.echo(f"Running tests in {env} environment...")
         click.echo("Clearing caches...")
         os.system('find . -type d -name "__pycache__" -exec rm -r {} + 2>/dev/null')
         os.system('find . -type f -name "*.pyc" -delete 2>/dev/null')
@@ -55,3 +59,6 @@ def register_commands(app):
         else:
             click.echo("Tests failed! 😢")
             exit(1)
+
+    # Register the test command group
+    app.cli.add_command(test_cli)

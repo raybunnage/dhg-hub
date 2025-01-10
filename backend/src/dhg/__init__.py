@@ -21,4 +21,8 @@ def create_app(config_name=None):
 
     register_commands(app)
 
+    # Optional: Print debug info
+    app.logger.info(f"Created app with config: {config_name}")
+    app.logger.info(f"PYTHONPATH: {os.environ.get('PYTHONPATH')}")
+
     return app
