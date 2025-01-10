@@ -42,12 +42,10 @@ packages = ["backend/src/dhg"]
 only-packages = true
 
 [tool.pytest.ini_options]
-pythonpath = [
-    "backend/src"
-]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-addopts = "-v --cov=dhg"
+testpaths = ["backend/tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v -s --cache-clear"
 
 [tool.black]
 line-length = 88
@@ -98,3 +96,13 @@ module = [
     "fastapi.*",
 ]
 ignore_missing_imports = true
+
+[tool.cursor]
+test_framework = "pytest"
+test_path = "backend/tests"
+
+[tool.cursor.test_runner]
+command = "pytest"
+args = ["-v", "--cache-clear", "--timeout=30"]
+cwd = "."
+env = { "PYTHONPATH" = "." }

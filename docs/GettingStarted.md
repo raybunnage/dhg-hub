@@ -29,6 +29,17 @@ pip freeze | grep pydantic
 source .venv/bin/activate
 ```
 
+
+flask test run --env dev
+
+flask test run --env test
+
+flask test run --env prod
+
+flask test run --env dev --coverage
+
+rm -rf .pytest_cache
+
 **When to use**: Always run this first before any development work. Creates an isolated environment for your project.
 
 ## Run Tests 
