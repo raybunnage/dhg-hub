@@ -1,56 +1,86 @@
 ## Getting Started
-(Coming soon: Setup instructions, environment configuration, and development guidelines)
 
 [← Back to Main Documentation](./README.MD)
 
-# Getting Started
+### Package Management Commands
 
-when to do these?
-uv pip uninstall dhg-hub  # Remove old installation
-uv pip install -e .       # Reinstall in editable mode
+#### Reinstalling the Package
+```bash
+# Remove old installation
+uv pip uninstall dhg-hub
 
+# Reinstall in editable mode
+uv pip install -e .
+```
+**When to use**: When making changes to the package structure or after pulling major updates that affect package dependencies.
+
+#### Comparing Project Files
+```bash
 diff pyproject.toml backend/pyproject.toml
+```
+**When to use**: To check for differences between root and backend package configurations, ensuring consistency across the project.
 
+#### Checking Dependencies
+```bash
+# Search for specific imports
 grep -r "from pydantic import Secret" backend/src/dhg/
 
+# Update pydantic packages
 uv pip uninstall pydantic pydantic-settings
 uv pip install -e .
 
-# Verify installed versions
+# Check installed versions
 pip freeze | grep pydantic
+```
+**When to use**: When debugging dependency issues, particularly after pydantic updates or when verifying package versions.
 
+### Development Environment
 
-
-
-## Initial Setup
-
-### Virtual Environment
+#### Virtual Environment Activation
 ```bash
 source .venv/bin/activate
 ```
-
-
-flask test run --env dev
-
-flask test run --env test
-
-flask test run --env prod
-
-flask test run --env dev --coverage
-
-rm -rf .pytest_cache
-
 **When to use**: Always run this first before any development work. Creates an isolated environment for your project.
 
-## Run Tests 
-pytest backend/tests -v -s
-pytest backend/tests -v -s --cov=backend/src/dhg
-pytest backend/tests -v -s --tb=long
-pytest backend/tests -v -s -x
-pytest backend/tests -v -s --showlocals
-pytest backend/tests -v -s -x --showlocals
+### Testing Commands
 
+#### Environment-Specific Test Runs
+```bash
+# Development environment tests
+flask test run --env dev
 
+# Test environment tests
+flask test run --env test
+
+# Production environment tests
+flask test run --env prod
+
+# Development tests with coverage
+flask test run --env dev --coverage
+```
+**When to use**: When running tests against specific environments or checking test coverage.
+
+#### Cache Cleanup
+```bash
+rm -rf .pytest_cache
+```
+**When to use**: When you need to clear pytest cache to ensure clean test runs or resolve cache-related issues.
+
+### Common Test Commands
+```bash
+# Run all tests with various options
+pytest backend/tests -v -s                           # Verbose with output
+pytest backend/tests -v -s --cov=backend/src/dhg     # With coverage
+pytest backend/tests -v -s --tb=long                 # Long traceback
+pytest backend/tests -v -s -x                        # Stop on first failure
+pytest backend/tests -v -s --showlocals             # Show local variables
+pytest backend/tests -v -s -x --showlocals          # Combined options
+```
+**When to use**: During development to run tests with different levels of detail and functionality.
+
+### Specific Test Files
+```bash
+# Test specific modules
 pytest backend/tests/test_imports.py -v -s --showlocals
 pytest backend/tests/services/supabase/mixins/test_utils_mixin.py -v -s --showlocals
 pytest backend/tests/services/supabase/test_integration.py -v -s --showlocals
@@ -58,83 +88,21 @@ pytest backend/tests/test_experts.py -v -s --showlocals
 pytest backend/tests/test_supabase_service.py -v -s --showlocals
 pytest backend/tests/test_uni_document_types.py -v -s --showlocals
 pytest backend/tests/unit/test_supabase_service.py -v -s --showlocals
+```
+**When to use**: When focusing on specific test files during feature development or bug fixing.
 
+### Test Scripts
+```bash
+# Make test script executable
 chmod +x scripts/refresh_tests.sh
 
+# Run test refresh script
 ./scripts/refresh_tests.sh
 
-this works
+# Run tests with correct Python path
 PYTHONPATH=. pytest
-
-**Tip**: You should see `(.venv)` in your terminal prompt when activated.
-
-### Verify Setup
-```bash
-which python
 ```
-**When to use**: To confirm you're using the Python installation from your virtual environment.
-
-## Managing Dependencies
-
-### Update Requirements Files
-```bash
-# Generate main requirements
-uv pip compile pyproject.toml -o requirements.txt
-
-# Generate development requirements
-uv pip compile pyproject.toml --extra dev -o requirements-dev.txt
-```
-**When to use**: After adding new dependencies to `pyproject.toml`
-
-### Install Dependencies
-```bash
-# Install all dependencies (main + dev)
-uv pip install -r requirements.txt -r requirements-dev.txt
-
-# OR install separately:
-uv pip install -e .           # main dependencies
-uv pip install -e ".[dev]"    # dev dependencies
-```
-**When to use**: 
-- After first cloning the project
-- After pulling changes with new dependencies
-- After updating requirements files
-
-**Note**: The `-e` flag enables "editable" mode, so your code changes take effect immediately.
-
-## Project Structure
-```bash
-# Create Python package directories
-touch backend/src/__init__.py
-touch backend/src/dhg/__init__.py
-touch backend/src/dhg/api/__init__.py
-touch backend/src/dhg/core/__init__.py
-touch backend/src/dhg/models/__init__.py
-touch backend/src/dhg/services/__init__.py
-touch backend/src/dhg/services/supabase/__init__.py
-```
-**When to use**: One-time setup when initializing the project structure.
-
-## Testing
-```bash
-pytest tests/test_imports.py -v -s
-```
-**When to use**: To verify Python imports are working correctly
-- `-v`: verbose output
-- `-s`: shows print statements
-
-## Pro Tips
-1. **Always activate** your virtual environment first
-2. Run commands **one at a time**, checking for success
-3. Read error messages carefully - they usually point to the solution
-4. Keep this guide handy - you'll reference it often
-5. **View project structure** with:
-```bash
-tree -I "node_modules|__pycache__|.git|.pytest_cache|*.pyc|.DS_Store" backend/src/dhg
-```
-**When to use**: To get a clean view of your project structure, excluding common temporary/generated files
-
-[← Back to Main Documentation](./README.MD)
+**When to use**: When working with test automation scripts or ensuring correct Python path for tests.
 
 ## Documentation Structure
 The following documentation sections will be expanded:
