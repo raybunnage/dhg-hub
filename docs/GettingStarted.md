@@ -48,6 +48,12 @@ pytest backend/tests/test_supabase_service.py -v -s --showlocals
 pytest backend/tests/test_uni_document_types.py -v -s --showlocals
 pytest backend/tests/unit/test_supabase_service.py -v -s --showlocals
 
+chmod +x scripts/refresh_tests.sh
+
+./scripts/refresh_tests.sh
+
+this works
+PYTHONPATH=. pytest
 
 **Tip**: You should see `(.venv)` in your terminal prompt when activated.
 

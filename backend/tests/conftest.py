@@ -1,11 +1,22 @@
 import pytest
-import os
-from pathlib import Path
+from dhg import create_app
+from dhg.core.config import TestConfig
 
 
-@pytest.fixture(autouse=True)
-def setup_test_env():
-    """Setup test environment variables."""
-    os.environ["SUPABASE_URL"] = "https://your-project.supabase.co"
-    os.environ["SUPABASE_KEY"] = "your-anon-key"
-    yield
+@pytest.fixture
+def app():
+    """Create and configure a new app instance for each test."""
+    app = create_app(TestConfig)
+    yield app
+
+
+@pytest.fixture
+def client(app):
+    """A test client for the app."""
+    return app.test_client()
+
+
+@pytest.fixture
+def runner(app):
+    """A test runner for the app's Click commands."""
+    return app.test_cli_runner()
