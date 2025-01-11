@@ -3,117 +3,26 @@ from anthropic import Anthropic
 import dotenv
 import base64
 import httpx
-from typing import Optional, List, Dict, Union
+from typing import Optional, List, Dict, Union, Tuple, Any
 
 dotenv.load_dotenv()
 
-""" INSTRUCTIONS
-
-This module provides helper functions for interacting with the Anthropic Claude API.
-
-if __name__ == "__main__":
-    get_file_and_questions(file_name, naviaux_questions)
-
-MAIN FUNCTIONS:
-1. * get_file_and_questions():
-   - Gets a file and asks questions about it
-
-2. ** call_claude_basic():
-   - Simple text processing with system prompt
-   - Called by many many modules
-   - Usage: Call for basic Claude interactions
-
-3. ** call_claude_messages():
-   - Processes complex prompts with custom messages
-   - Called by citations.py, master_categories.py, transcription_processing.py
-   - Usage: Call for complex Claude interactions requiring specific message formats
-
-4. ** call_claude_follow_up():
-   - Processes follow up prompts with custom messages
-   - Called by concepts_pdfs.py and concepts_txts.py
-   - Usage: Call for follow up Claude interactions requiring specific message formats
-
-5. ** call_claude_pdf_with_messages():
-   - Processes complex PDF-related prompts with custom messages
-   - not yet called externally
-   - Usage: Call for PDF analysis requiring specific message formats
-
-4. ** call_claude_pdf_basic():
-   - Simple PDF processing with basic prompt
-   - not yet called externally
-   - Usage: Call for straightforward PDF analysis tasks
-
-
-INTNERAL HELPER FUNCTIONS:
-1. get_pdf_client_and_model():
-   - internal helper to Returns configured PDF-enabled Claude client and model name
-   - Called by get_file_and_questions()
-   - Usage: Call when needing to process PDFs with Claude
-
-2. get_std_client_and_model(): 
-   - internal helper to Returns standard Claude client and model name
-   - Called by call_claude_basic() and call_claude_messages
-   - Usage: Call for non-PDF Claude interactions
-
-3. get_completion():
-   - internal helper to get completions
-   - Called by call_claude_basic() and call_claude_messages
-
-4. prompt_questions():
-   - internal helper to prompt questions about a pdf file
-   - Called by get_file_and_questions()
-
-USAGE:
-- Import needed client/model getters and processing functions
-- Use PDF-specific functions (call_claude_pdf_*) when working with PDFs
-- Use call_claude_basic() for text-only processing
-- Configure system prompts and messages as needed for specific tasks
-
-STATUS:
-The module provides core Claude API interaction functionality, including both standard and PDF-enabled operations. It serves as a central point for Claude API interactions across the project.
-
-FEEDBACK:
-1. Consider separating PDF-specific functionality into a dedicated module (e.g., claude_pdf_utils.py)
-2. Implement a ClaudeClient class to encapsulate client creation and basic operations
-3. Add comprehensive error handling and logging
-4. Improve type hints and docstrings for all functions
-5. Implement a configuration management system for API keys and model names
-6. Add unit tests for each function to ensure reliability
-
-UNUSED/DUPLICATE FUNCTIONS:
-This module does not contain unused or duplicate functions. All listed functions serve specific purposes and are likely called from other parts of the project.
-
-"""
-
 
 class AnthropicService:
-    def __init__(self, api_key: str):
-        """Initialize Anthropic clients and model name."""
-        self.std_client = Anthropic(api_key=api_key)
-        self.pdf_client = Anthropic(
-            default_headers={"anthropic-beta": "pdfs-2024-09-25"}
-        )
+    def __init__(self, api_key: str) -> None:
+        """Initialize Anthropic client and model name."""
+        self.client = Anthropic(api_key=api_key)
         self.model_name = "claude-3-5-sonnet-20241022"
 
-    # def _get_completion(self, client, messages):
-    #     """Internal helper to get completions from Claude API."""
-    #     return (
-    #         client.messages.create(
-    #             model=self.model_name, max_tokens=4096, messages=messages
-    #         )
-    #         .content[0]
-    #         .text
-    #     )
-
     def call_claude_basic(
-        self, max_tokens: int, input_string: str, system_string: str = None
+        self, max_tokens: int, input_string: str, system_string: Optional[str] = None
     ) -> str:
         """Basic Claude call with system prompt and single user message."""
         messages = [
             {"role": "user", "content": [{"type": "text", "text": input_string}]}
         ]
 
-        response = self.std_client.messages.create(
+        response = self.client.messages.create(
             model=self.model_name,
             max_tokens=max_tokens,
             messages=messages,
@@ -122,10 +31,13 @@ class AnthropicService:
         return response.content[0].text
 
     def call_claude_messages(
-        self, max_tokens: int, messages, system_string: str
+        self,
+        max_tokens: int,
+        messages: List[Dict[str, Union[str, List[Dict[str, str]]]]],
+        system_string: str,
     ) -> str:
         """Complex Claude call supporting multiple messages and system prompt."""
-        response = self.std_client.messages.create(
+        response = self.client.messages.create(
             model=self.model_name,
             system=system_string,
             messages=messages,
@@ -174,7 +86,7 @@ class AnthropicService:
         ]
 
         try:
-            response = self.std_client.messages.create(
+            response = self.client.messages.create(
                 model=self.model_name,
                 max_tokens=max_tokens,
                 system=system_string,
@@ -185,7 +97,7 @@ class AnthropicService:
         except Exception as e:
             raise Exception(f"Error in follow-up conversation: {str(e)}")
 
-    def test_anthropic(self):
+    def test_anthropic(self) -> Tuple[str, str, str]:
         # Test basic call
         response_basic = self.call_claude_basic(
             max_tokens=1000,
@@ -253,13 +165,160 @@ class AnthropicService:
                 {"role": "user", "content": [{"type": "text", "text": prompt}, *media]}
             ]
 
-            response = self.std_client.messages.create(
+            response = self.client.messages.create(
                 model=self.model_name, max_tokens=1000, messages=messages
             )
             return response.content[0].text
 
         except Exception as e:
             raise Exception(f"Error processing image: {str(e)}")
+
+    # internal helper to get the client and model
+    def get_pdf_client_and_model(self) -> Tuple[Anthropic, str]:
+        """Return the client and model name."""
+        return self.client, self.model_name
+
+    # internal helper to get the client and model
+    def get_std_client_and_model(self) -> Tuple[Anthropic, str]:
+        """Return the client and model name."""
+        return self.client, self.model_name
+
+    # internal helper from anthropic example
+    def get_completion(
+        self,
+        client: Anthropic,
+        messages: List[Dict[str, Union[str, List[Dict[str, str]]]]],
+    ) -> str:
+        """Get completion from Claude API.
+
+        Args:
+            client: Anthropic client instance
+            messages: List of message dictionaries
+        Returns:
+            str: Claude's response text
+        """
+        return (
+            client.messages.create(
+                model=self.model_name,  # Changed from MODEL_NAME to self.model_name
+                max_tokens=4096,
+                messages=messages,
+            )
+            .content[0]
+            .text
+        )
+
+    # ** external high level function or a complex helper call with messages from anthropic example - no system prompt
+    def call_claude_pdf_with_messages(
+        self,
+        max_tokens: int,
+        messages: List[Dict[str, Union[str, List[Dict[str, str]]]]],
+        temperature: float = 0.0,
+        timeout: Optional[float] = None,
+    ) -> str:
+        """
+        Makes a call to Claude's PDF-enabled API with custom message formatting.
+
+        This function allows for more complex interactions with Claude's PDF capabilities
+        by accepting pre-formatted messages. This enables multi-turn conversations and
+        custom message structures needed for PDF processing.
+
+        Args:
+            max_tokens (int): Maximum number of tokens allowed in the response
+            messages (List[Dict]): List of message dictionaries in Claude's format.
+                Each message should have 'role' and 'content' keys. For PDFs,
+                content should include document source information.
+            temperature (float, optional): Controls randomness in responses. Defaults to 0.0.
+            timeout (float, optional): Timeout for API call in seconds. Defaults to None.
+
+        Returns:
+            str: Claude's response text
+
+        Raises:
+            ValueError: If messages are not properly formatted
+            Exception: If API call fails
+        """
+        try:
+            # Validate message format
+            for msg in messages:
+                if (
+                    not isinstance(msg, dict)
+                    or "role" not in msg
+                    or "content" not in msg
+                ):
+                    raise ValueError("Invalid message format")
+
+            client, model_name = self.get_pdf_client_and_model()
+            response = client.messages.create(
+                model=model_name,
+                max_tokens=max_tokens,
+                messages=messages,
+                temperature=temperature,
+                timeout=timeout,
+            )
+            return response.content[0].text
+
+        except Exception as e:
+            raise Exception(f"PDF processing failed: {str(e)}")
+
+    # external helper for a simple call makes user messages - no system prompt
+    def call_claude_pdf_basic(
+        self,
+        max_tokens: int,
+        input_string: str,
+        pdf_path: str,
+        temperature: float = 0.0,
+        timeout: Optional[float] = None,
+    ) -> str:
+        """
+        Makes a basic call to Claude's API with a single user message and PDF.
+
+        Args:
+            max_tokens (int): Maximum number of tokens allowed in the response
+            input_string (str): The user message/prompt to send to Claude
+            pdf_path (str): Path to the PDF file to analyze
+            temperature (float, optional): Controls randomness in responses. Defaults to 0.0.
+            timeout (float, optional): Timeout for API call in seconds. Defaults to None.
+
+        Returns:
+            str: Claude's response text
+        """
+        if not input_string.strip():
+            raise ValueError("Input string cannot be empty")
+
+        try:
+            # Read the PDF file
+            with open(pdf_path, "rb") as f:
+                pdf_content = f.read()
+
+            # Create message with both text and PDF using correct type
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": input_string},
+                        {
+                            "type": "document",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "application/pdf",
+                                "data": base64.b64encode(pdf_content).decode(),
+                            },
+                        },
+                    ],
+                }
+            ]
+
+            response = self.client.messages.create(
+                model=self.model_name,
+                max_tokens=max_tokens,
+                messages=messages,
+                temperature=temperature,
+                timeout=timeout,
+            )
+            return response.content[0].text
+
+        except Exception as e:
+            raise Exception(f"PDF processing failed: {str(e)}")
 
 
 if __name__ == "__main__":
@@ -377,15 +436,68 @@ if __name__ == "__main__":
             print(f"First Response: {conv['first_response']}")
             print(f"Follow-up Response: {response}")
 
+    def test_claude_pdf_basic() -> None:
+        """Test the basic PDF processing functionality."""
+        print("\n=== Testing Basic PDF Processing ===")
+
+        # Define the correct path to test PDF
+        test_pdf_path = "backend/tests/test_files/pdfs/test_document.pdf"
+
+        try:
+            # First verify the PDF exists
+            if not os.path.exists(test_pdf_path):
+                print(f"\n✗ Test PDF not found at: {test_pdf_path}")
+                print(
+                    "Please run 'python backend/tests/create_test_pdf.py' to generate the test file"
+                )
+                return
+
+            print(f"\n✓ Found test PDF at: {test_pdf_path}")
+            print(f"PDF size: {os.path.getsize(test_pdf_path)} bytes")
+
+            # Test 1: Basic PDF analysis
+            basic_query = "Please analyze this PDF and list the key points mentioned."
+            response = anthropic.call_claude_pdf_basic(
+                max_tokens=1000,
+                input_string=basic_query,
+                pdf_path=test_pdf_path,
+                temperature=0.0,
+                timeout=30.0,
+            )
+            print("\n✓ Basic PDF analysis test passed")
+            print(f"Response preview: {response[:200]}...")
+
+            # Test 2: Specific content query
+            specific_query = "What are the four key points listed in the document?"
+            response = anthropic.call_claude_pdf_basic(
+                max_tokens=1000,
+                input_string=specific_query,
+                pdf_path=test_pdf_path,
+                temperature=0.0,
+                timeout=30.0,
+            )
+            print("\n✓ Specific content query test passed")
+            print(f"Response preview: {response[:200]}...")
+
+        except FileNotFoundError as e:
+            print(f"\n✗ Error accessing PDF file: {str(e)}")
+            print(f"Current working directory: {os.getcwd()}")
+            print(f"Please ensure the PDF exists at: {os.path.abspath(test_pdf_path)}")
+            raise
+        except Exception as e:
+            print(f"\n✗ PDF basic test suite failed with error: {str(e)}")
+            raise
+
     # Run all tests
     def run_all_tests():
         print("\n=== Starting Comprehensive Test Suite ===")
         try:
-            basic_responses = test_basic_calls()
-            message_chain_response = test_message_chains()
-            test_image_analysis()
-            test_follow_up_conversations()
-            print("\n=== All tests completed successfully ===")
+            # basic_responses = test_basic_calls()
+            # message_chain_response = test_message_chains()
+            # test_image_analysis()
+            # test_follow_up_conversations()
+            # print("\n=== All tests completed successfully ===")
+            test_claude_pdf_basic()
         except Exception as e:
             print(f"\nTest suite failed with error: {str(e)}")
 

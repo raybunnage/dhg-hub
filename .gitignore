@@ -66,5 +66,9 @@ coverage/
 scripts/**/*.pyc
 scripts/**/__pycache__/
 
-backend/tests/test_images/
-backend/tests/test_images/**
+backend/tests/test_images/*
+!backend/tests/test_images/.gitkeep
+
+backend/tests/test_files/*
+!backend/tests/test_files/.gitkeep
+*.pdf
