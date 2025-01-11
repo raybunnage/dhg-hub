@@ -85,14 +85,14 @@ class PdfAnthropic:
 def test_source_query():
     """Test function to query source information from a specific PDF."""
     from dhg.services.anthropic_service import AnthropicService
-    from dhg.services.prompts.paper_analysis_prompts import SOURCE_QUERY_PROMPT
+    from dhg.services.prompts.paper_analysis_prompts import PAPER_ANALYSIS_PROMPT
 
     pdf_path = "backend/tests/test_files/pdfs/long_covid_frontiers_2024_v1.pdf"
     anthropic_service = AnthropicService()
     pdf_processor = PdfAnthropic(anthropic_service, pdf_path)
 
     # Pass the prompt directly to process_pdf
-    responses = pdf_processor.process_pdf(custom_prompts=[SOURCE_QUERY_PROMPT])
+    responses = pdf_processor.process_pdf(custom_prompts=[PAPER_ANALYSIS_PROMPT])
     print("Source Information:")
     print(responses[0])
     return responses[0]

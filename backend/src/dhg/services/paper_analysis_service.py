@@ -3,6 +3,8 @@ import os
 from typing import Dict, List, Optional
 from pathlib import Path
 from dhg.services.pdf_anthropic import PdfAnthropic
+from dhg.services.anthropic_service import AnthropicService
+from dhg.services.prompts.paper_analysis_prompts import PAPER_ANALYSIS_PROMPT
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -10,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class PaperAnalysisService:
-    def __init__(self, anthropic_service):
-        """Initialize the service."""
-        self.anthropic_service = anthropic_service
+    def __init__(self, pdf_processor: PdfAnthropic):
+        """Initialize the service with a PDF processor."""
+        self.pdf_processor = pdf_processor
         logger.info("PaperAnalysisService initialized")
 
     def _extract_text_from_pdf(self, pdf_path: str) -> str:
@@ -46,31 +48,14 @@ Please provide your analysis in the following JSON format:
 }}
 """
 
-    def extract_strengths_and_weaknesses(self, pdf_path: str) -> Dict:
+    def extract_strengths_and_weaknesses(self) -> Dict:
         """Extract strengths and weaknesses from the paper using Claude."""
-        logger.info(f"Extracting strengths and weaknesses from: {pdf_path}")
+        logger.info("Extracting strengths and weaknesses")
 
         try:
-            pdf_processor = PdfAnthropic(self.anthropic_service, pdf_path)
-
-            prompt = """You are a research paper analysis expert. Please analyze this academic paper and identify its key strengths and weaknesses. 
-Focus on methodology, research design, data analysis, conclusions, and overall scientific rigor.
-
-Please provide your analysis in the following JSON format:
-{
-    "strengths": [
-        "strength 1",
-        "strength 2",
-        ...
-    ],
-    "weaknesses": [
-        "weakness 1",
-        "weakness 2",
-        ...
-    ]
-}"""
-
-            responses = pdf_processor.process_pdf(custom_prompts=[prompt])
+            responses = self.pdf_processor.process_pdf(
+                custom_prompts=[PAPER_ANALYSIS_PROMPT]
+            )
 
             try:
                 analysis = eval(responses[0])  # Convert string to dict
@@ -182,19 +167,16 @@ Provide suggestions in JSON format as a list of objects with 'recommendation' an
             logger.error(f"Error saving outputs: {str(e)}")
             return False
 
-    def analyze_paper(self, pdf_path: str, output_dir: str) -> Dict:
+    def analyze_paper(self, output_dir: str) -> Dict:
         """Run the complete paper analysis pipeline."""
-        logger.info(f"Starting paper analysis for: {pdf_path}")
+        logger.info("Starting paper analysis")
 
         try:
-            # Initialize PDF processor
-            self.pdf_processor = PdfAnthropic(self.anthropic_service, pdf_path)
-
-            # Run analysis pipeline
-            analysis = self.extract_strengths_and_weaknesses(pdf_path)
+            # Remove PDF processor initialization since it's now in constructor
+            analysis = self.extract_strengths_and_weaknesses()
             suggestions = self.generate_improvement_suggestions(analysis)
             rewritten_content = self.rewrite_paper_with_improvements(
-                pdf_path, suggestions
+                self.pdf_processor.pdf_path, suggestions
             )
             rationale = self.generate_improvement_rationale(suggestions)
 
@@ -215,33 +197,13 @@ Provide suggestions in JSON format as a list of objects with 'recommendation' an
             return {}  # Return empty dict instead of None
 
 
-if __name__ == "__main__":
-    # Import required service
-    import os
-    from dhg.services.anthropic_service import AnthropicService
-
-    # Get API key from environment variable
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("Error: ANTHROPIC_API_KEY environment variable not set")
-        exit(1)
-
-    # Initialize services
-    anthropic_service = AnthropicService(api_key=api_key)
-    paper_analysis = PaperAnalysisService(anthropic_service)
-
-    # Define paths
+def test_source_query():
     pdf_path = "backend/tests/test_files/pdfs/long_covid_frontiers_2024_v1.pdf"
-    output_dir = "backend/tests/services/paper_analysis"
+    anthropic_service = AnthropicService()
+    pdf_processor = PdfAnthropic(anthropic_service, pdf_path)
+    paper_analysis = PaperAnalysisService(pdf_processor)
+    paper_analysis.analyze_paper("backend/tests/test_files/output")
 
-    # Run analysis
-    print(f"Analyzing paper: {pdf_path}")
-    results = paper_analysis.analyze_paper(pdf_path, output_dir)
 
-    if results:
-        print("\nAnalysis completed successfully!")
-        print("Output files:")
-        for key, path in results.items():
-            print(f"- {key}: {path}")
-    else:
-        print("\nAnalysis failed!")
+if __name__ == "__main__":
+    test_source_query()

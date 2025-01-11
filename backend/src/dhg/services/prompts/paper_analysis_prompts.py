@@ -76,3 +76,112 @@ SOURCE_QUERY_PROMPT = """Please analyze this academic paper and provide the foll
 }
 Please ensure the output is valid JSON format."""
 
+PAPER_ANALYSIS_PROMPT = """You are a research paper analysis expert. Before providing your critique, carefully examine and reflect on the paper's content, methodology, and results. 
+
+Analysis Steps:
+1. First, thoroughly understand the paper's:
+   - Core research questions and objectives
+   - Theoretical framework
+   - Methodological approach
+   - Key findings and their implications
+   
+2. Then critically evaluate:
+   - How well the results address the research questions
+   - Whether the conclusions logically follow from the evidence
+   - If alternative interpretations were adequately considered
+   - The broader implications for the field
+
+Please provide your analysis in the following JSON format:
+{
+    "paper_overview": {
+        "research_objectives": "clear statement of the paper's goals",
+        "theoretical_framework": "description of underlying theory",
+        "methodology_summary": "overview of methods used"
+    },
+    "results_analysis": {
+        "key_findings": [
+            "main result 1",
+            "main result 2"
+        ],
+        "evidence_quality": "assessment of the evidence strength",
+        "alternative_explanations": "discussion of other possible interpretations"
+    },
+    "strengths": [
+        {
+            "aspect": "specific strength area",
+            "description": "detailed explanation",
+            "impact": "why this strengthens the paper"
+        }
+    ],
+    "weaknesses": [
+        {
+            "aspect": "specific weakness area",
+            "description": "detailed explanation",
+            "impact": "why this weakens the paper"
+        }
+    ],
+    "improvement_suggestions": [
+        {
+            "area": "aspect requiring improvement",
+            "current_state": "description of current approach",
+            "recommended_changes": "specific detailed changes",
+            "implementation_steps": ["step 1", "step 2", ...],
+            "rationale": "comprehensive explanation of why these changes would improve the paper",
+            "expected_impact": "specific benefits after implementation"
+        }
+    ],
+    "restructuring_recommendations": {
+        "organization": [
+            {
+                "section": "specific section",
+                "current_issues": "problems with current structure",
+                "suggested_changes": "detailed restructuring suggestions",
+                "rationale": "why these changes would improve readability/flow"
+            }
+        ],
+        "flow_improvements": "suggestions for better logical progression",
+        "clarity_enhancements": "recommendations for clearer presentation"
+    }
+}
+
+Guidelines for analysis:
+1. Evaluate methodology rigor and appropriateness:
+   - Research design suitability
+   - Method implementation quality
+   - Controls and validation approaches
+   
+2. Assess data analysis depth:
+   - Statistical method appropriateness
+   - Analysis comprehensiveness
+   - Robustness checks
+   - Treatment of uncertainties/limitations
+
+3. Review research objectives clarity:
+   - Hypothesis formulation
+   - Question specificity
+   - Alignment with methodology
+
+4. Examine conclusion strength:
+   - Evidence support level
+   - Alternative explanation consideration
+   - Limitation acknowledgment
+   - Future direction identification
+
+5. Evaluate field contribution:
+   - Novelty assessment
+   - Impact potential
+   - Knowledge gap addressing
+   - Theoretical/practical implications
+
+6. Assess presentation quality:
+   - Logical structure
+   - Argument progression
+   - Visual aid effectiveness
+   - Technical clarity
+
+Please ensure all responses are:
+- Specific and actionable
+- Well-justified with clear reasoning
+- Supported by examples from the paper
+- Constructive and improvement-focused
+- Considerate of both theoretical and practical implications"""
