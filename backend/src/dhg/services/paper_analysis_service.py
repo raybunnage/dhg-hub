@@ -52,7 +52,7 @@ Please provide your analysis in the following JSON format:
 
         try:
             pdf_processor = PdfAnthropic(self.anthropic_service, pdf_path)
-            
+
             prompt = """You are a research paper analysis expert. Please analyze this academic paper and identify its key strengths and weaknesses. 
 Focus on methodology, research design, data analysis, conclusions, and overall scientific rigor.
 
@@ -71,7 +71,7 @@ Please provide your analysis in the following JSON format:
 }"""
 
             responses = pdf_processor.process_pdf(custom_prompts=[prompt])
-            
+
             try:
                 analysis = eval(responses[0])  # Convert string to dict
                 return analysis
@@ -100,7 +100,7 @@ Weaknesses:
 Provide suggestions in JSON format as a list of objects with 'recommendation' and 'rationale' fields."""
 
             responses = self.pdf_processor.process_pdf(custom_prompts=[prompt])
-            
+
             try:
                 suggestions = eval(responses[0])
                 return suggestions
@@ -189,7 +189,7 @@ Provide suggestions in JSON format as a list of objects with 'recommendation' an
         try:
             # Initialize PDF processor
             self.pdf_processor = PdfAnthropic(self.anthropic_service, pdf_path)
-            
+
             # Run analysis pipeline
             analysis = self.extract_strengths_and_weaknesses(pdf_path)
             suggestions = self.generate_improvement_suggestions(analysis)
