@@ -4,6 +4,9 @@
 
 ### Package Management Commands
 
+<!-- NOT EVEN SURE WHAT I'M TESTING -->
+npx jest --coverage ./tests/user-preferences/crud.test.ts
+
 #### Virtual Environment Activation
 ```bash
 source .venv/bin/activate
