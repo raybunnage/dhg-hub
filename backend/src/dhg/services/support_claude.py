@@ -1,9 +1,9 @@
-# import sys
-
-# sys.path.append("src")
 import os
 from anthropic import Anthropic
 import dotenv
+import base64
+import httpx
+from typing import Optional, List, Dict, Union
 
 dotenv.load_dotenv()
 
@@ -106,14 +106,18 @@ class AnthropicService:
     #     )
 
     def call_claude_basic(
-        self, max_tokens: int, input_string: str, system_string: str
+        self, max_tokens: int, input_string: str, system_string: str = None
     ) -> str:
         """Basic Claude call with system prompt and single user message."""
+        messages = [
+            {"role": "user", "content": [{"type": "text", "text": input_string}]}
+        ]
+
         response = self.std_client.messages.create(
             model=self.model_name,
-            system=system_string,
-            messages=[{"role": "user", "content": input_string}],
             max_tokens=max_tokens,
+            messages=messages,
+            system=system_string,
         )
         return response.content[0].text
 
@@ -131,23 +135,55 @@ class AnthropicService:
 
     def call_claude_follow_up(
         self,
-        max_tokens: int,
-        input_string: str,
+        initial_message: str,
         follow_up_message: str,
-        system_string: str,
+        system_string: Optional[str] = None,
+        max_tokens: int = 2048,
+        temperature: float = 0,
     ) -> str:
-        """Follow-up Claude call with conversation history."""
-        response = self.std_client.messages.create(
-            model=self.model_name,
-            max_tokens=max_tokens,
-            system=system_string,
-            temperature=0,
-            messages=[
-                {"role": "user", "content": input_string},
-                {"role": "assistant", "content": follow_up_message},
-            ],
-        )
-        return response.content[0].text if response.content else None
+        """
+        Process a follow-up conversation with Claude.
+
+        Args:
+            initial_message: The user's initial message
+            follow_up_message: Claude's previous response to follow up on
+            system_string: Optional system prompt to guide Claude's behavior
+            max_tokens: Maximum tokens in response (default: 2048)
+            temperature: Randomness in response (0 = deterministic, 1 = creative)
+
+        Returns:
+            str: Claude's response text
+
+        Example:
+            initial = "What's the capital of France?"
+            follow_up = "It's Paris, the City of Light."
+            response = call_claude_follow_up(initial, follow_up, "Tell me more about...")
+        """
+        messages = [
+            {"role": "user", "content": [{"type": "text", "text": initial_message}]},
+            {
+                "role": "assistant",
+                "content": [{"type": "text", "text": follow_up_message}],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Tell me more about what you just said."}
+                ],
+            },
+        ]
+
+        try:
+            response = self.std_client.messages.create(
+                model=self.model_name,
+                max_tokens=max_tokens,
+                system=system_string,
+                temperature=temperature,
+                messages=messages,
+            )
+            return response.content[0].text if response.content else None
+        except Exception as e:
+            raise Exception(f"Error in follow-up conversation: {str(e)}")
 
     def test_anthropic(self):
         # Test basic call
@@ -182,8 +218,176 @@ class AnthropicService:
 
         return response_basic, response_complex, response_follow_up
 
+    def _encode_image_file(self, image_path: str) -> str:
+        """Convert image file to base64 string."""
+        with open(image_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode("utf-8")
+
+    def _encode_image_url(self, image_url: str) -> str:
+        """Convert image from URL to base64 string."""
+        return base64.b64encode(httpx.get(image_url).content).decode("utf-8")
+
+    def call_claude_with_image(
+        self, image_source: str, prompt: str, is_url: bool = False
+    ) -> str:
+        """Call Claude with an image and get a response."""
+        try:
+            if is_url:
+                media = [
+                    {"type": "image", "source": {"type": "url", "url": image_source}}
+                ]
+            else:
+                with open(image_source, "rb") as img:
+                    media = [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",
+                                "data": base64.b64encode(img.read()).decode(),
+                            },
+                        }
+                    ]
+
+            messages = [
+                {"role": "user", "content": [{"type": "text", "text": prompt}, *media]}
+            ]
+
+            response = self.std_client.messages.create(
+                model=self.model_name, max_tokens=1000, messages=messages
+            )
+            return response.content[0].text
+
+        except Exception as e:
+            raise Exception(f"Error processing image: {str(e)}")
+
 
 if __name__ == "__main__":
+    # Initialize the service
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     anthropic = AnthropicService(api_key)
-    anthropic.test_anthropic()
+
+    def test_basic_calls():
+        print("\n=== Testing Basic Calls ===")
+        try:
+            # Test with different max_tokens and system strings
+            responses = []
+
+            # Simple greeting test
+            response1 = anthropic.call_claude_basic(
+                max_tokens=100,
+                input_string="Hi! How are you?",
+                system_string="You are a friendly assistant.",
+            )
+            responses.append(response1)
+            print("\nBasic greeting test:", response1)
+
+            # Technical explanation test
+            response2 = anthropic.call_claude_basic(
+                max_tokens=500,
+                input_string="What is Python?",
+                system_string="You are a technical instructor. Keep responses under 100 words.",
+            )
+            responses.append(response2)
+            print("\nTechnical explanation test:", response2)
+
+            return responses
+        except Exception as e:
+            print(f"\nTest failed with error: {str(e)}")
+            raise
+
+    def test_message_chains():
+        print("\n=== Testing Message Chains ===")
+        messages = [
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": "What is machine learning?"}],
+            },
+            {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Machine learning is a branch of AI that enables systems to learn from data.",
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": "Can you give an example?"}],
+            },
+        ]
+
+        response = anthropic.call_claude_messages(
+            max_tokens=1000,
+            messages=messages,
+            system_string="You are an AI expert giving simple explanations.",
+        )
+        print("\nMessage Chain Response:", response)
+        return response
+
+    def test_image_analysis():
+        print("\n=== Testing Image Analysis ===")
+        # Test with a local image
+        try:
+            local_response = anthropic.call_claude_with_image(
+                image_source="backend/tests/test_images/test1.jpg",
+                prompt="What do you see in this image?",
+                is_url=False,
+            )
+            print("\nLocal Image Analysis:", local_response)
+        except Exception as e:
+            print("\nLocal image test failed:", str(e))
+
+        # Test with an image URL
+        try:
+            url_response = anthropic.call_claude_with_image(
+                image_source="https://upload.wikimedia.org/wikipedia/commons/e/eb/Ash_Tree_-_geograph.org.uk_-_590710.jpg",
+                prompt="Describe this image in detail.",
+                is_url=True,
+            )
+            print("\nURL Image Analysis:", url_response)
+        except Exception as e:
+            print("\nURL image test failed:", str(e))
+
+    def test_follow_up_conversations():
+        print("\n=== Testing Follow-up Conversations ===")
+        # Test different types of conversations
+        conversations = [
+            {
+                "initial": "What is quantum computing?",
+                "first_response": "Quantum computing uses quantum mechanics principles like superposition and entanglement to perform computations.",
+                "system": "You are a quantum physics professor.",
+            },
+            {
+                "initial": "How do you make chocolate chip cookies?",
+                "first_response": "The basic ingredients are flour, butter, sugar, eggs, and chocolate chips.",
+                "system": "You are a professional baker.",
+            },
+        ]
+
+        for i, conv in enumerate(conversations, 1):
+            print(f"\nConversation Test {i}:")
+            response = anthropic.call_claude_follow_up(
+                initial_message=conv["initial"],
+                follow_up_message=conv["first_response"],
+                system_string=conv["system"],
+            )
+            print(f"Initial: {conv['initial']}")
+            print(f"First Response: {conv['first_response']}")
+            print(f"Follow-up Response: {response}")
+
+    # Run all tests
+    def run_all_tests():
+        print("\n=== Starting Comprehensive Test Suite ===")
+        try:
+            basic_responses = test_basic_calls()
+            message_chain_response = test_message_chains()
+            test_image_analysis()
+            test_follow_up_conversations()
+            print("\n=== All tests completed successfully ===")
+        except Exception as e:
+            print(f"\nTest suite failed with error: {str(e)}")
+
+    # Execute all tests
+    run_all_tests()

@@ -65,4 +65,6 @@ coverage/
 # Scripts artifacts
 scripts/**/*.pyc
 scripts/**/__pycache__/
-scripts/**/.pytest_cache/
+
+backend/tests/test_images/
+backend/tests/test_images/**
