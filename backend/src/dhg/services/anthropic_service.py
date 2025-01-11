@@ -10,12 +10,12 @@ dotenv.load_dotenv()
 
 
 class AnthropicService:
-    def __init__(self, api_key: str) -> None:
-        """Initialize Anthropic client and model name.
-
-        Args:
-            api_key (str): Anthropic API key for authentication
-        """
+    def __init__(self):
+        """Initialize the Anthropic service with API key from environment."""
+        dotenv.load_dotenv()
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY environment variable is not set")
         self.client = Anthropic(api_key=api_key)
         self.model_name = "claude-3-5-sonnet-20241022"
 

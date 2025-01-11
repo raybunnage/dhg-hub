@@ -62,3 +62,17 @@ improvements to the paper. Include:
 
 Format in markdown with clear sections and subsections.
 """
+
+SOURCE_QUERY_PROMPT = """Please analyze this academic paper and provide the following information in a JSON format:
+{
+    "title": "full paper title",
+    "authors": ["list of authors"],
+    "journal": "journal name",
+    "publication_date": "publication date (YYYY-MM-DD if available, else YYYY-MM)",
+    "doi": "DOI if available",
+    "volume": "volume number if available",
+    "issue": "issue number if available",
+    "pages": "page range if available"
+}
+Please ensure the output is valid JSON format."""
+
