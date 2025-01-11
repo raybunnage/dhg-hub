@@ -71,4 +71,5 @@ backend/tests/test_images/*
 
 backend/tests/test_files/*
 !backend/tests/test_files/.gitkeep
-*.pdf
+*.pdftests/output/
+backend/tests/output/

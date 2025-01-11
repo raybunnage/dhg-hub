@@ -14,6 +14,10 @@ source .venv/bin/activate
 **When to use**: Always run this first before any development work. Creates an isolated environment for your project.
 
 
+tree backend -I '__pycache__|*.pyc|*.pyo|*.pyd|.git|.env|.venv|.pytest_cache|.coverage|htmlcov|dist|build|*.egg-info' -P '*.py|*.md|*.txt|*.ini|*.yaml|*.json'
+
+
+
 #### Reinstalling the Package
 ```bash
 # Remove old installation
